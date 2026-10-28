@@ -182,6 +182,12 @@ body.furi-off rt{display:none}
 .flashcard .meaning{font-size:1.05rem;margin-top:10px}
 .flashcard .tap{font-size:.8rem;color:var(--muted);margin-top:12px}
 .flashcard .fc-note{margin-top:12px;padding:10px 12px;background:var(--note);border-radius:10px;font-size:.92rem;line-height:1.55;text-align:left}
+.note-box{margin-top:10px;padding:10px 12px;background:var(--note);border-radius:10px;font-size:.92rem;line-height:1.55;text-align:left}
+.gx-item{border-top:1px dashed var(--line);padding:14px 0;text-align:left}
+.gx-pat{font-size:1.35rem;font-weight:900}
+.gx-mean{font-weight:700;margin-top:2px}
+.gx-ex{margin-top:6px}
+.gx-exid{color:var(--muted);font-size:.9rem}
 .fc-nav{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .fc-nav .btn{flex:1}
 .q-prompt{font-size:1.05rem;font-weight:700;line-height:1.5}
@@ -838,7 +844,6 @@ function examInfo(){
   var sisa=LESSONS.filter(function(l){return !state.done[l.id];});
   var sisaKartu=0;
   sisa.forEach(function(l){sisaKartu+=(l.cards?l.cards.length:0);});
-  GRAM_THEMES.forEach(function(t,i){if(!state.done["gd-"+i])sisaKartu+=t.items.length;});
   VOCAB_CATS.forEach(function(c,i){if(!state.done["vd-"+i])sisaKartu+=c.words.length;});
   var denom=Math.max(dTarget,1);
   return {dExam:dExam,dTarget:dTarget,sisaMisi:sisa.length,sisaKartu:sisaKartu,ritmeMisi:sisa.length?Math.max(1,Math.ceil(sisa.length/denom)):0,ritmeKartu:sisaKartu?Math.max(1,Math.ceil(sisaKartu/denom)):0};
@@ -1237,15 +1242,26 @@ function nextDeck(){
 function startQuizOnly(qs,cards,title,id){current={id:id,title:title,questions:qs,cards:cards,source:"",pattern:"",introTitle:"",intro:"",exampleJp:"",exampleId:""};qAttempt=beginAttempt(id);qXpEarned=0;saveProgress();step=2;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderQuestion();}
 function pickOthers(pool,self,n,key){var others=pool.filter(function(x){return x!==self;});return shuffle(others).slice(0,n).map(function(x){return x[key];});}
 function mkChoices(correct,distractors){var all=shuffle([correct].concat(distractors));return{choices:all,answer:all.indexOf(correct)};}
+function openGramExplain(i){
+  var t=GRAM_THEMES[i];if(!t)return;
+  current={id:"gx-"+i,title:"Penjelasan — "+t.name,questions:[],cards:[]};
+  reviewMode=false;openLessonView();
+  el("lvBar").style.width="0%";el("lvStepText").textContent="Penjelasan pola";
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Penjelasan pola • '+esc(t.name)+'</span><h2>Baca penjelasannya dulu, baru kuis</h2><p class="lead">Pola-pola ini sudah kamu pelajari bersama senseimu — penjelasan di bawah ini kami tulis sendiri biar makin nempel, bukan teks buku.</p>'+t.items.map(function(it){
+    return '<div class="gx-item"><div class="gx-pat jp">'+esc(it.p)+'</div><div class="gx-mean">'+esc(it.m)+'</div><div class="gx-ex jp">'+esc(it.ex)+'</div><div class="gx-exid">'+esc(it.exId)+'</div>'+(it.note?'<div class="note-box">💡 '+esc(it.note)+'</div>':'')+'</div>';
+  }).join("")+'<div class="actions"><button class="btn btn-accent" id="btnGxQuiz" type="button">Mulai kuis tema ini →</button></div></div>';
+  el("btnGxQuiz").addEventListener("click",function(){gramQuiz(i);});
+  window.scrollTo(0,0);
+}
 function gramQuiz(themeIdx){
   var items,arranges,title,id,cards;
   if(themeIdx<0){items=[];arranges=[];GRAM_THEMES.forEach(function(t){items=items.concat(t.items);arranges=arranges.concat(t.arrange);});title="Kuis Campuran Bunpō 70";id="gq-all";cards=[];GRAM_THEMES.forEach(function(t){cards=cards.concat(gramCards(t));});}
   else{var t=GRAM_THEMES[themeIdx];items=t.items;arranges=t.arrange;title="Kuis Bunpō — "+t.name;id="gq-"+themeIdx;cards=gramCards(t);}
   var pool=shuffle(items),qs=[],i,it,mc,type;
   for(i=0;i<8;i++){it=pool[i%pool.length];type=i%3;
-    if(type===0){mc=mkChoices(it.m,pickOthers(items,it,3,"m"));qs.push({kind:"choice",prompt:"Apa arti pola 「"+it.p+"」?",choices:mc.choices,answer:mc.answer,explain:"「"+it.p+"」= "+it.m+". Contoh: "+it.ex+" ("+it.exId+")",reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
-    else if(type===1){mc=mkChoices(it.ex,pickOthers(items,it,3,"ex"));qs.push({kind:"choice",prompt:"Kalimat mana yang memakai pola 「"+it.p+"」("+it.m+")?",choices:mc.choices,answer:mc.answer,explain:"Kalimat itu memakai "+it.p+": "+it.exId,reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
-    else{mc=mkChoices(it.p,pickOthers(items,it,3,"p"));qs.push({kind:"choice",prompt:"Pola mana yang artinya ‘"+it.m+"’?",choices:mc.choices,answer:mc.answer,explain:"Pola itu "+it.p+". Contoh: "+it.ex+" ("+it.exId+")",reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
+    if(type===0){mc=mkChoices(it.m,pickOthers(items,it,3,"m"));qs.push({kind:"choice",prompt:"Apa arti pola 「"+it.p+"」?",choices:mc.choices,answer:mc.answer,explain:"「"+it.p+"」= "+it.m+". Contoh: "+it.ex+" ("+it.exId+")"+(it.note?" 💡 "+it.note:""),reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId,note:it.note||""}});}
+    else if(type===1){mc=mkChoices(it.ex,pickOthers(items,it,3,"ex"));qs.push({kind:"choice",prompt:"Kalimat mana yang memakai pola 「"+it.p+"」("+it.m+")?",choices:mc.choices,answer:mc.answer,explain:"Kalimat itu memakai "+it.p+": "+it.exId+(it.note?" 💡 "+it.note:""),reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId,note:it.note||""}});}
+    else{mc=mkChoices(it.p,pickOthers(items,it,3,"p"));qs.push({kind:"choice",prompt:"Pola mana yang artinya ‘"+it.m+"’?",choices:mc.choices,answer:mc.answer,explain:"Pola itu "+it.p+". Contoh: "+it.ex+" ("+it.exId+")"+(it.note?" 💡 "+it.note:""),reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId,note:it.note||""}});}
   }
   shuffle(arranges).slice(0,2).forEach(function(a){qs.push({kind:"arrange",prompt:a.prompt,tokens:a.tokens,answerJp:a.answerJp,explain:a.explain});});
   startQuizOnly(qs,cards,title,id);
@@ -1266,14 +1282,14 @@ function startCtxLesson(){qAttempt=beginAttempt(VOCAB_CTX_LESSON.id);qXpEarned=0
 
 function gramThemeCardHtml(t,i){
   var doneD=state.done["gd-"+i],doneQ=state.done["gq-"+i];
-  return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneD&&doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Flashcard pola + arti + contoh + penjelasan, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
+  return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Penjelasan pola dari kami, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gexplain="'+i+'">Penjelasan</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
 }
 function vocabCatCardHtml(c,i){
   var doneD=state.done["vd-"+i];
   return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard. Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
 }
 function wireBoostButtons(scope){
-  var map=[["data-gdeck",function(i){var t=GRAM_THEMES[i];startDeck("Flashcard Bunpō — "+t.name,gramCards(t),"gd-"+i);}],
+  var map=[["data-gexplain",function(i){openGramExplain(i);}],
            ["data-gquiz",function(i){gramQuiz(i);}],
            ["data-vdeck",function(i){var c=VOCAB_CATS[i];startDeck("Flashcard Kosakata — "+c.name,vocabCards(c),"vd-"+i);}],
            ["data-ctx",function(){startCtxLesson();}]];
@@ -1283,13 +1299,13 @@ function renderBoost(){
   var gEl=el("boostGrammar"),vEl=el("boostVocab");if(!gEl||!vEl)return;
   gEl.innerHTML=GRAM_THEMES.map(function(t,i){
     var doneD=state.done["gd-"+i],doneQ=state.done["gq-"+i];
-    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneD&&doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Flashcard pola + arti + contoh + penjelasan, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
+    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Penjelasan pola dari kami, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gexplain="'+i+'">Penjelasan</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
   }).join("");
   vEl.innerHTML=VOCAB_CATS.map(function(c,i){
     var doneD=state.done["vd-"+i];
     return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard. Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
   }).join("");
-  var map=[["data-gdeck",function(i){var t=GRAM_THEMES[i];startDeck("Flashcard Bunpō — "+t.name,gramCards(t),"gd-"+i);}],
+  var map=[["data-gexplain",function(i){openGramExplain(i);}],
            ["data-gquiz",function(i){gramQuiz(i);}],
            ["data-vdeck",function(i){var c=VOCAB_CATS[i];startDeck("Flashcard Kosakata — "+c.name,vocabCards(c),"vd-"+i);}],
            ];
@@ -1320,7 +1336,6 @@ function catUnits(){
   });
   if(typeof VOCAB_CTX_LESSON!=="undefined"){kotoba.units.push({id:VOCAB_CTX_LESSON.id,title:VOCAB_CTX_LESSON.title,core:true,done:!!state.done[VOCAB_CTX_LESSON.id],score:(typeof state.scores[VOCAB_CTX_LESSON.id]==="number"?state.scores[VOCAB_CTX_LESSON.id]:null),max:VOCAB_CTX_LESSON.questions.length});}
   GRAM_THEMES.forEach(function(t,i){
-    bunpo.units.push({id:"gd-"+i,title:"Flashcard Bunp\u014d: "+t.name,core:false,done:!!state.done["gd-"+i],score:null,max:0});
     bunpo.units.push({id:"gq-"+i,title:"Kuis Bunp\u014d: "+t.name,core:false,done:!!state.done["gq-"+i],score:null,max:0});
   });
   bunpo.units.push({id:"gq-all",title:"Kuis Campuran Bunp\u014d 70",core:false,done:!!state.done["gq-all"],score:null,max:0});
