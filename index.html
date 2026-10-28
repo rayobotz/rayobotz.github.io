@@ -554,7 +554,7 @@ var LESSONS=[
   {kind:"choice",prompt:"Isi bagian kosong: ‘Besok harus bangun pagi.’",promptJp:"明日は早く起き（　）。",choices:["なければなりません","なくてもいいです","たことがあります","たいです"],answer:0,explain:"起きる → 起きなければなりません untuk menyatakan kewajiban."},
   {kind:"choice",prompt:"「今日は宿題をしなくてもいいです。」Artinya?",choices:["Hari ini tidak perlu mengerjakan PR.","Hari ini harus mengerjakan PR.","Hari ini dilarang mengerjakan PR."],answer:0,explain:"〜なくてもいい = boleh tidak melakukan. Bukan larangan, ya."},
   {kind:"arrange",prompt:"Susun jadi kalimat: ‘Saya harus pergi ke rumah sakit.’",tokens:["病院へ","行かなければ","なりません"],answerJp:"病院へ行かなければなりません。",explain:"行く → 行かない → buang い, tambah ければなりません."},
-  {kind:"choice",prompt:"Versi santai dari 〜なければならない yang sering diucapkan adalah…",choices:["〜なきゃ","〜ちゃう","〜なさい","〜まくる"],answer:0,explain:"〜なきゃ adalah singkatan lisan dari 〜なければならない. Sering muncul di percakapan."}
+  {kind:"choice",prompt:"Versi santai dari 〜なければならない yang sering diucapkan adalah…",choices:["〜なきゃ","〜ちゃう","〜とく","〜じゃう"],answer:0,explain:"〜なきゃ adalah singkatan lisan dari 〜なければならない. Sering muncul di percakapan."}
  ]},
 {id:"n4-takoto",level:"N5",skill:"Grammar",group:"Review N5",title:"Pengalaman: 〜たことがある",pattern:"V-た + ことがある",minutes:8,source:SRC_N5,
  introTitle:"‘Pernah…’ dalam satu pola gampang",intro:"〜たことがある = pernah melakukan. Bentuk た adalah bentuk lampau santai (食べた, 行った). Pasangannya untuk ‘belum pernah’ adalah 一度も〜たことがない.",
@@ -591,10 +591,10 @@ var LESSONS=[
  exampleJp:"注文した本が、昨日届きました。",exampleId:"Buku yang saya pesan sudah sampai kemarin.",
  cards:[{front:"届く",reading:"とどく",meaning:"sampai (barang/pesan tiba di tujuan)"},{front:"増える",reading:"ふえる",meaning:"bertambah (jumlahnya naik sendiri)"},{front:"決める",reading:"きめる",meaning:"memutuskan / menentukan"}],
  questions:[
-  {kind:"choice",prompt:"「来月から仕事が増えます。」Arti 増えます?",choices:["bertambah","berkurang","berhenti"],answer:0,explain:"増える = bertambah. Lawannya 減る (へる) = berkurang."},
+  {kind:"choice",prompt:"「来月から仕事が増えます。」Arti 増えます?",choices:["bertambah","berkurang","berubah"],answer:0,explain:"増える = bertambah. Lawannya 減る (へる) = berkurang."},
   {kind:"choice",prompt:"Pilih kata yang tepat: ‘Paketnya belum ___ .’",promptJp:"荷物はまだ（　）。",choices:["届いていません","増えていません","決めていません"],answer:0,explain:"Untuk paket/barang, kata yang cocok adalah 届く (sampai)."},
-  {kind:"choice",prompt:"「相談する」artinya…",promptJp:"分からないことは、先輩に相談します。",choices:["berkonsultasi / minta pendapat","menyembunyikan","melupakan"],answer:0,explain:"相談する = berdiskusi untuk minta pertimbangan, kata N3 yang sangat sering keluar."},
-  {kind:"choice",prompt:"「決して忘れません。」Kata 決して selalu berpasangan dengan…",choices:["kalimat negatif (tidak akan pernah)","kalimat perintah","kalimat tanya"],answer:0,explain:"決して〜ない = sama sekali tidak akan pernah. Pola pasangannya selalu negatif."}
+  {kind:"choice",prompt:"「相談する」artinya…",promptJp:"分からないことは、先輩に相談します。",choices:["berkonsultasi / minta pendapat","menyarankan / mengusulkan","melaporkan secara resmi"],answer:0,explain:"相談する = berdiskusi untuk minta pertimbangan, kata N3 yang sangat sering keluar."},
+  {kind:"choice",prompt:"「決して忘れません。」Kata 決して selalu berpasangan dengan…",choices:["kalimat negatif (tidak akan pernah)","kalimat positif / afirmatif","kalimat tanya"],answer:0,explain:"決して〜ない = sama sekali tidak akan pernah. Pola pasangannya selalu negatif."}
  ]},
 {id:"n3-ba-hodo",level:"N3",skill:"Grammar",group:"Grammar N3",title:"Makin… Makin…: 〜ば〜ほど",pattern:"V-ば + V辞書形 + ほど",minutes:9,source:SRC_N3_G,
  introTitle:"Semakin A, semakin B",intro:"〜ば〜ほど menyatakan perubahan sejajar: kalau A naik, B ikut naik. Kata kerja yang sama diulang: bentuk ば lalu bentuk kamus + ほど. Untuk kata sifat: 安ければ安いほど.",
@@ -624,7 +624,7 @@ var LESSONS=[
   {kind:"choice",prompt:"Bentuk pasif dari 言う adalah…",choices:["言われる","言わせる","言える"],answer:0,explain:"言う → 言われる. 言わせる itu kausatif (menyuruh berkata), lain cerita."},
   {kind:"choice",prompt:"「電車の中で、足を踏まれました。」Artinya?",choices:["Di dalam kereta, kaki saya diinjak (orang).","Saya menginjak kaki orang di kereta.","Saya sengaja menginjak-injak lantai kereta."],answer:0,explain:"Ini ‘pasif kena dampak’: saya menderita akibat perbuatan orang lain."},
   {kind:"arrange",prompt:"Susun pasif: ‘Buku ini dibaca banyak orang.’",tokens:["この本は","多くの人に","読まれています"],answerJp:"この本は多くの人に読まれています。",explain:"Pelaku ditandai に: 多くの人に + 読まれています."},
-  {kind:"choice",prompt:"「雨に降られて、服が濡れてしまいました。」Kenapa pasif dipakai di sini?",choices:["Karena hujan memberi dampak buruk ke pembicara","Karena pembicara menyebabkan hujan","Karena hujan adalah manusia"],answer:0,explain:"Pasif tidak langsung: kejadian alam pun bisa ‘mengenai’ kita dan merugikan."}
+  {kind:"choice",prompt:"「雨に降られて、服が濡れてしまいました。」Kenapa pasif dipakai di sini?",choices:["Karena hujan memberi dampak buruk ke pembicara","Karena pembicara menyebabkan hujan","Karena pembicara tidak membawa payung"],answer:0,explain:"Pasif tidak langsung: kejadian alam pun bisa ‘mengenai’ kita dan merugikan."}
  ]},
 {id:"n3-shieki",level:"N3",skill:"Grammar",group:"Grammar N3",title:"Kausatif: 〜させる",pattern:"使役 (shieki)",minutes:10,source:SRC_N3_G,
  introTitle:"Menyuruh & membiarkan orang berbuat",intro:"〜させる = membuat/menyuruh seseorang melakukan sesuatu (atau membiarkannya). Orang yang disuruh ditandai に. Pasangannya yang bikin pusing — kausatif-pasif 〜させられる (‘dipaksa melakukan’) — mulai dikenalkan di sini.",
@@ -644,7 +644,7 @@ var LESSONS=[
   {kind:"choice",prompt:"Cara baca 様 dalam 「田中様」?",choices:["さま","よう","ため"],answer:0,explain:"様 setelah nama orang dibaca さま — panggilan hormat, lebih sopan dari さん."},
   {kind:"choice",prompt:"局 dalam 「郵便局」 dibaca…",promptJp:"郵便局（ゆうびん□□□）",choices:["きょく","やく","さま"],answer:0,explain:"郵便局 = ゆうびんきょく (kantor pos). 局 dibaca キョク."},
   {kind:"choice",prompt:"Kanji untuk はたらく (bekerja) adalah…",choices:["働く","動く","遊ぶ"],answer:0,explain:"働く = bekerja. Hati-hati, 動く (うごく) mirip tapi artinya ‘bergerak’."},
-  {kind:"choice",prompt:"「届く」artinya…",choices:["sampai / tiba (barang)","mengirim","membuka"],answer:0,explain:"届く (とどく) = barang/pesan sampai ke tujuan. Pasangan transitifnya 届ける."}
+  {kind:"choice",prompt:"「届く」artinya…",choices:["sampai / tiba (barang)","mengirim","mengantarkan"],answer:0,explain:"届く (とどく) = barang/pesan sampai ke tujuan. Pasangan transitifnya 届ける."}
  ]},
 {id:"n3-kanji-seikatsu",level:"N3",skill:"Kanji",group:"Kosakata & Kanji N3",title:"Kanji Kehidupan Harian",pattern:"届・慣・迎・準・備",minutes:9,source:SRC_N3_K,
  introTitle:"Kanji di paket, jadwal, dan pintu rumah",intro:"お届け物 di slip paket, 準備 di jadwal kerja, 迎える saat menjemput seseorang di stasiun. Kanji N3 yang ini kepakai beneran, bukan cuma buat ujian.",
@@ -652,7 +652,7 @@ var LESSONS=[
  cards:[{front:"届ける",reading:"とどける",meaning:"mengantarkan / menyampaikan (barang)"},{front:"慣れる",reading:"なれる",meaning:"menjadi terbiasa"},{front:"迎える",reading:"むかえる",meaning:"menjemput / menyambut"}],
  questions:[
   {kind:"choice",prompt:"Cara baca 「準備」?",choices:["じゅんび","じゅんぴ","しゅんび"],answer:0,explain:"準備 (じゅんび) = persiapan. Hampir tiap hari muncul di tempat kerja."},
-  {kind:"choice",prompt:"「捨てる」artinya…",choices:["membuang","menyimpan","meminjam"],answer:0,explain:"捨てる (すてる) = membuang. Pasangan kata ゴミを捨てる."},
+  {kind:"choice",prompt:"「捨てる」artinya…",choices:["membuang","menyimpan","menitipkan"],answer:0,explain:"捨てる (すてる) = membuang. Pasangan kata ゴミを捨てる."},
   {kind:"choice",prompt:"Kanji untuk むかえる (menjemput) adalah…",choices:["迎える","慣れる","届ける"],answer:0,explain:"迎える = menjemput/menyambut kedatangan seseorang."},
   {kind:"choice",prompt:"「日本の生活に慣れました。」Arti 慣れました?",choices:["sudah terbiasa","sudah lupa","sudah bosan"],answer:0,explain:"慣れる = menjadi terbiasa setelah melewati masa adaptasi."}
  ]},
@@ -661,9 +661,9 @@ var LESSONS=[
  exampleJp:"その映画を見て、とても感動しました。",exampleId:"Menonton film itu, saya sangat terharu.",
  cards:[{front:"感動する",reading:"かんどうする",meaning:"terharu (tersentuh secara emosional)"},{front:"残念",reading:"ざんねん",meaning:"sayang sekali / mengecewakan"},{front:"懐かしい",reading:"なつかしい",meaning:"nostalgik, bikin rindu masa lalu"}],
  questions:[
-  {kind:"choice",prompt:"「試験に落ちて、残念です。」Perasaan yang tepat?",choices:["kecewa / sayang sekali","sangat senang","mengantuk"],answer:0,explain:"残念 (ざんねん) dipakai saat hasil tidak sesuai harapan."},
+  {kind:"choice",prompt:"「試験に落ちて、残念です。」Perasaan yang tepat?",choices:["kecewa / sayang sekali","malu / sungkan","kesepian"],answer:0,explain:"残念 (ざんねん) dipakai saat hasil tidak sesuai harapan."},
   {kind:"choice",prompt:"Pilih kata: ‘Dengar lagu ini jadi ___ masa SMA.’",promptJp:"この歌を聞くと、高校の時が（　）。",choices:["懐かしいです","恥ずかしいです","残念です"],answer:0,explain:"懐かしい = perasaan rindu/nostalgia pada masa lalu."},
-  {kind:"choice",prompt:"「我慢する」artinya…",choices:["menahan diri / bersabar","menyerah","berteriak"],answer:0,explain:"我慢する (がまんする) = menahan / bersabar menghadapi yang tidak enak."},
+  {kind:"choice",prompt:"「我慢する」artinya…",choices:["menahan diri / bersabar","menyerah","memaksakan diri"],answer:0,explain:"我慢する (がまんする) = menahan / bersabar menghadapi yang tidak enak."},
   {kind:"choice",prompt:"Cara baca 「驚く」?",choices:["おどろく","なつく","はずく"],answer:0,explain:"驚く (おどろく) = terkejut/kaget."}
  ]},
 {id:"n3-listen-eki",level:"N3",skill:"Listening",group:"Listening & Reading",title:"Listening: Pengumuman & Jadwal",pattern:"聞き取り",minutes:10,source:SRC_L,
