@@ -92,6 +92,18 @@ section{margin-top:30px}
 .mission-item .mi-body{flex:1;min-width:0}
 .mission-item .mi-title{font-weight:700}
 .mission-item .mi-meta{font-size:.82rem;opacity:.85}
+.exam-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.exam-card h3{margin-bottom:6px}
+.exam-big{font-size:1.45rem;font-weight:800;line-height:1.25}
+.exam-card p{font-size:.92rem;color:var(--muted)}
+.exam-card p strong{color:var(--ink)}
+.step-row{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:12px;margin-bottom:10px}
+.step-num{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#fff;color:#3730A3;font-weight:800;display:flex;align-items:center;justify-content:center}
+.step-body{flex:1;min-width:0}
+.step-title{font-weight:700}
+.step-meta{font-size:.82rem;opacity:.85}
+.queue-list{list-style:none;margin:6px 0 0;padding:0}
+.queue-list li{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding:7px 0;font-size:.92rem}
 .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 .btn-accent{background:var(--accent);color:#fff}
 @media (prefers-color-scheme: dark){.btn-accent{color:#1B0E0C}}
@@ -312,14 +324,23 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
           <li><strong>Yang salah diulang</strong> — jawaban yang salah otomatis masuk tumpukan <strong>Ulang</strong> dan muncul lagi nanti, sampai kamu bisa.</li>
           <li><strong>Cek progres</strong> — di tab Progres kelihatan bagian mana yang sudah nempel dan mana yang perlu diulang.</li>
         </ol>
-        <p>Satu misi cuma 8–10 menit. Lebih baik sedikit tapi rutin, daripada banyak dalam sekali duduk. Kalau bingung mulai dari mana, tekan saja <strong>Misi Hari Ini</strong> — dia yang menunjuk misi berikutnya untukmu.</p>
+        <p>Satu misi cuma 8–10 menit. Lebih baik sedikit tapi rutin, daripada banyak dalam sekali duduk. Kalau bingung mulai dari mana, ikuti saja <strong>Misi Hari Ini — 3 Langkah</strong> di bawah: ulang, perbaiki, lanjut. Dia yang menunjuk urutan berikutnya untukmu.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="examTitle">
+      <div class="exam-card tape tape-kinako">
+        <h3 id="examTitle">Hitung mundur ujian</h3>
+        <div id="examBody"></div>
       </div>
     </section>
 
     <section aria-labelledby="missionTitle">
       <div class="mission tape tape-sky">
-        <h3 id="missionTitle">Misi hari ini — cukup dua ini dulu</h3>
-        <p>Misi berikutnya di jalurmu + satu target N3. Selesai dua-duanya, hari ini sudah menang. Sisanya bonus.</p>
+        <h3 id="missionTitle">Misi Hari Ini — 3 Langkah</h3>
+        <p>Ikuti urutannya dari atas: ulang yang menunggu, perbaiki yang pernah keliru, baru lanjut materi. Selesai tiga-tiganya, hari ini sudah menang. Sisanya bonus.</p>
+        <div id="step1box"></div>
+        <div id="step2box"></div>
         <div class="mission-list" id="missionList"></div>
       </div>
     </section>
@@ -467,7 +488,7 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
         <h2>Cara pakainya gampang</h2>
         <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
         <ol class="guide-steps">
-          <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi berikutnya buatmu. Urutannya: Review N5 → Fondasi N4 → materi N3. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
+          <li><span class="g-num">1</span><p><strong>Ikuti “Misi Hari Ini — 3 Langkah” di beranda.</strong> Urutannya selalu sama: <strong>1</strong> ulang kartu yang menunggu di tumpukan, <strong>2</strong> perbaiki pelajaran yang skornya belum sempurna, <strong>3</strong> lanjut materi baru (jalurnya: Review N5 → Fondasi N4 → materi N3). Di atasnya ada hitung mundur ke ujian 6 Desember 2026 plus ritme harianmu — jadi kamu selalu tahu hari ini cukup ngapain. Nggak perlu milih-milih dulu.</p></li>
           <li><span class="g-num">2</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu jawab kuis / flashcard / listening-nya sampai selesai. Tebak dulu, baru lihat benar-salahnya — di situlah materinya nempel. Skor dan XP tersimpan otomatis di HP ini.</p></li>
           <li><span class="g-num">3</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
           <li><span class="g-num">4</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihannya beneran seperti ujian.</p></li>
@@ -793,6 +814,56 @@ function synthReviewCard(q){
 }
 function queueReviewFor(q){var c=matchReviewCard(q)||synthReviewCard(q);if(c)addReview(c);}
 
+var EXAM_DATE=new Date(2026,11,6); /* JLPT N3: Minggu, 6 Desember 2026 (tanggal terverifikasi) */
+var TARGET_DATE=new Date(2026,10,22); /* target semua materi selesai: Minggu, 22 November 2026 */
+function daysUntil(d){var now=new Date();var a=new Date(now.getFullYear(),now.getMonth(),now.getDate());var b=new Date(d.getFullYear(),d.getMonth(),d.getDate());return Math.round((b-a)/86400000);}
+function examInfo(){
+  var dExam=daysUntil(EXAM_DATE),dTarget=daysUntil(TARGET_DATE);
+  var sisa=LESSONS.filter(function(l){return !state.done[l.id];});
+  var sisaKartu=0;
+  sisa.forEach(function(l){sisaKartu+=(l.cards?l.cards.length:0);});
+  GRAM_THEMES.forEach(function(t,i){if(!state.done["gd-"+i])sisaKartu+=t.items.length;});
+  VOCAB_CATS.forEach(function(c,i){if(!state.done["vd-"+i])sisaKartu+=c.words.length;});
+  var denom=Math.max(dTarget,1);
+  return {dExam:dExam,dTarget:dTarget,sisaMisi:sisa.length,sisaKartu:sisaKartu,ritmeMisi:sisa.length?Math.max(1,Math.ceil(sisa.length/denom)):0,ritmeKartu:sisaKartu?Math.max(1,Math.ceil(sisaKartu/denom)):0};
+}
+/* Antrean Perlu Diulang: pelajaran yang sudah selesai tapi skor TERBAIK-nya belum
+   sempurna, ditambah kartu di tumpukan ulang. Aplikasi ini tidak menyimpan catatan
+   per butir soal, jadi antrean diturunkan dari skor terbaik per pelajaran. */
+function antreanUlang(){
+  var list=[];
+  LESSONS.forEach(function(l){
+    if(state.done[l.id]&&typeof state.scores[l.id]==="number"){
+      var mx=l.questions?l.questions.length:4;
+      if(state.scores[l.id]<mx)list.push({id:l.id,title:l.title,score:state.scores[l.id],max:mx,ratio:state.scores[l.id]/mx,startable:true});
+    }
+  });
+  if(typeof VOCAB_CTX_LESSON!=="undefined"&&state.done[VOCAB_CTX_LESSON.id]&&typeof state.scores[VOCAB_CTX_LESSON.id]==="number"&&state.scores[VOCAB_CTX_LESSON.id]<VOCAB_CTX_LESSON.questions.length){
+    list.push({id:VOCAB_CTX_LESSON.id,title:VOCAB_CTX_LESSON.title,score:state.scores[VOCAB_CTX_LESSON.id],max:VOCAB_CTX_LESSON.questions.length,ratio:state.scores[VOCAB_CTX_LESSON.id]/VOCAB_CTX_LESSON.questions.length,startable:false});
+  }
+  list.sort(function(a,b){return a.ratio-b.ratio;});
+  return list;
+}
+function renderExam(){
+  var box=el("examBody");if(!box)return;
+  var ei=examInfo();
+  if(ei.dExam<0){box.innerHTML='<p class="exam-big">Hari ujian sudah lewat</p><p>JLPT N3 sudah dilaksanakan <strong>Minggu, 6 Desember 2026</strong>. Sekarang fokusnya menjaga yang sudah nempel \u2014 ulangi antrean dan tumpukan kartu di bawah.</p>';return;}
+  var ritme="";
+  if(!ei.sisaMisi&&!ei.sisaKartu){ritme="<p><strong>Semua materi sudah selesai</strong> \u2014 tinggal jaga yang sudah nempel sampai hari ujian: ulangi antrean dan tumpukan kartu.</p>";}
+  else if(ei.dTarget<=0){ritme="<p>Target selesai <strong>22 November 2026</strong> sudah lewat, tapi masih ada sisa: <strong>"+ei.sisaMisi+" pelajaran</strong> dan <strong>"+ei.sisaKartu+" kartu baru</strong>. Kerjakan sedikit-sedikit tiap hari \u2014 masih sempat.</p>";}
+  else{ritme="<p>Target: semua materi selesai <strong>Minggu, 22 November 2026</strong> (dua minggu sebelum ujian). Sisa <strong>"+ei.sisaMisi+" pelajaran</strong> dan <strong>"+ei.sisaKartu+" kartu baru</strong> \u2014 cukup <strong>\u00B1"+ei.ritmeMisi+" pelajaran/hari</strong> dan <strong>\u00B1"+ei.ritmeKartu+" kartu baru/hari</strong> buat sampai tepat waktu.</p>";}
+  box.innerHTML='<p class="exam-big">H-'+ei.dExam+' ke ujian \u2014 JLPT N3, Minggu, 6 Desember 2026</p>'+ritme;
+}
+function renderSteps(){
+  var b1=el("step1box"),b2=el("step2box");if(!b1||!b2)return;
+  var n=state.review.length;
+  b1.innerHTML='<div class="step-row"><span class="step-num">1</span><div class="step-body"><div class="step-title">Ulang kartu yang menunggu</div><div class="step-meta">'+(n?("Ada "+n+" kartu di tumpukan ulang \u2014 kartu yang pernah belum nempel, menunggu diulang sampai bisa."):"Tumpukan ulangmu kosong. Lewati langkah ini, lanjut ke langkah 2.")+'</div></div>'+(n?'<button class="btn btn-indigo btn-small" type="button" id="btnStepReview">Ulang</button>':"")+"</div>";
+  var q=antreanUlang();
+  var first=q.filter(function(u){return u.startable;})[0];
+  var ref=first||q[0];
+  b2.innerHTML='<div class="step-row"><span class="step-num">2</span><div class="step-body"><div class="step-title">Perbaiki yang pernah keliru</div><div class="step-meta">'+(q.length?("Ada "+q.length+" pelajaran yang skor terbaiknya belum sempurna \u2014 yang paling perlu: "+esc(ref.title)+" ("+ref.score+"/"+ref.max+"). Daftar lengkapnya ada di Progresku."):"Belum ada pelajaran yang perlu diperbaiki. Lanjut ke langkah 3.")+'</div></div>'+(first?('<button class="btn btn-indigo btn-small" type="button" data-start="'+first.id+'">Ulangi</button>'):"")+"</div>";
+  var br=el("btnStepReview");if(br)br.addEventListener("click",startReview);
+}
 function renderHome(){
   el("statXp").textContent=state.xp;
   var lv=levelFromXp(state.xp);el("statLevel").textContent=lv.level;
@@ -810,12 +881,15 @@ function renderHome(){
   if(doneCount>=8)badges.push("Separuh Jalan");
   if(doneCount>=LESSONS.length)badges.push("Semua Misi Tamat");
   el("badgeRow").innerHTML=badges.length?badges.map(function(b){return '<span class="badge b-skill">'+esc(b)+'</span>';}).join(""):'<span class="hint" style="color:var(--muted);font-size:.85rem">Lencana muncul di sini setelah misi pertamamu selesai.</span>';
+  renderExam();
+  renderSteps();
   // mission: next lesson on the path (Review N5 -> Fondasi N4 -> N3) + first incomplete N3
   var mFirst=LESSONS.filter(function(l){return !state.done[l.id];})[0];
   var mN3=LESSONS.filter(function(l){return l.level==="N3"&&!state.done[l.id];})[0];
   var missions=[mFirst,(mN3&&mFirst&&mN3.id!==mFirst.id)?mN3:null].filter(Boolean);
-  if(!missions.length){el("missionList").innerHTML='<p style="opacity:.9">Semua misi sudah selesai. Ulang tumpukan pengulangan di bawah, atau ulangi misi favoritmu dari jalur belajar.</p>';}
-  else{el("missionList").innerHTML=missions.map(function(l){return '<div class="mission-item"><div class="mi-body"><div class="mi-title">'+esc(l.title)+'</div><div class="mi-meta">'+l.level+' • '+esc(l.skill)+' • ±'+l.minutes+' menit • <span class="jp">'+esc(l.pattern)+'</span></div></div><button class="btn btn-indigo btn-small" type="button" data-start="'+l.id+'">Mulai</button></div>';}).join("");}
+  var step3Head='<div class="step-row"><span class="step-num">3</span><div class="step-body"><div class="step-title">Lanjut materi</div><div class="step-meta">Misi berikutnya di jalurmu + satu target N3.</div></div></div>';
+  if(!missions.length){el("missionList").innerHTML=step3Head+'<p style="opacity:.9">Semua misi sudah selesai. Ulang tumpukan pengulangan di bawah, atau ulangi misi favoritmu dari jalur belajar.</p>';}
+  else{el("missionList").innerHTML=step3Head+missions.map(function(l){return '<div class="mission-item"><div class="mi-body"><div class="mi-title">'+esc(l.title)+'</div><div class="mi-meta">'+l.level+' • '+esc(l.skill)+' • ±'+l.minutes+' menit • <span class="jp">'+esc(l.pattern)+'</span></div></div><button class="btn btn-indigo btn-small" type="button" data-start="'+l.id+'">Mulai</button></div>';}).join("");}
   // groups
   var groups=["Review N5","Fondasi N4","Grammar N3","Kosakata & Kanji N3","Listening & Reading","Dokkai • 読解"];
   el("lessonGroups").innerHTML=groups.map(function(g){
@@ -1234,7 +1308,10 @@ function scoredUnits(){
 }
 function summaryText(){
   var cats=catUnits();
+  var eiS=examInfo();
   var lines=["Progres JLPT N3-ku \ud83d\udcda ("+new Date().toLocaleDateString("id-ID")+")",
+    eiS.dExam>=0?("Hitung mundur: H-"+eiS.dExam+" ke JLPT N3 (Minggu, 6 Desember 2026) \u2022 target materi selesai 22 November 2026"):("JLPT N3 (6 Desember 2026) sudah lewat"),
+    eiS.dTarget>0&&eiS.sisaMisi?("Ritme: sisa "+eiS.sisaMisi+" pelajaran & "+eiS.sisaKartu+" kartu baru \u2192 cukup \u00B1"+eiS.ritmeMisi+" pelajaran/hari & \u00B1"+eiS.ritmeKartu+" kartu/hari"):(eiS.sisaMisi?("Sisa materi: "+eiS.sisaMisi+" pelajaran & "+eiS.sisaKartu+" kartu baru"):("Semua materi inti selesai \u2014 tinggal menjaga yang sudah nempel")),
     "Level "+levelFromXp(state.xp).level+" \u2022 "+state.xp+" XP"+(studyMeta.streakDays?(" \u2022 Rangkaian belajar: "+studyMeta.streakDays+" hari"):""),""];
   cats.forEach(function(c){var s=catStat(c);lines.push(c.label+" ("+c.jp+"): "+s.done+"/"+s.total+" selesai ("+s.pct+"%) \u2014 "+s.status+(s.extraTotal?(" • penguat "+s.extraDone+"/"+s.extraTotal):""));});
   var sc=scoredUnits().slice().sort(function(a,b){return (b.score/b.max)-(a.score/a.max);});
@@ -1245,6 +1322,8 @@ function summaryText(){
     var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<0.75;}).slice(0,3);
     if(weak.length){lines.push("","Masih perlu diulang:");weak.forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});}
   } else { lines.push("","Belum ada misi berskor yang selesai \u2014 baru mulai."); }
+  var qS=antreanUlang();
+  if(qS.length){lines.push("","Antrean perlu diulang (skor terbaik belum sempurna):");qS.forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});}
   lines.push("","Kartu di tumpukan ulang: "+state.review.length+" kartu");
   return lines.join("\n");
 }
@@ -1263,7 +1342,15 @@ function renderProgres(){
   } else {
     lists='<div class="prog-card" style="margin-top:10px"><p>Belum ada misi berskor yang selesai. Kerjakan satu misi dulu \u2014 bagian terkuat dan yang perlu diulang akan muncul di sini.</p><p class="hint" style="margin-top:6px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
   }
-  box.innerHTML='<div class="prog-grid">'+cards+"</div>"+lists;
+  var q=antreanUlang();
+  var queueHtml="";
+  if(q.length||state.review.length){
+    var items=q.map(function(u){return '<li><span>'+esc(u.title)+' — skor terbaik '+u.score+'/'+u.max+'</span>'+(u.startable?('<button class="btn btn-ghost btn-small" type="button" data-start="'+u.id+'">Ulangi</button>'):"")+'</li>';}).join("");
+    queueHtml='<div class="prog-card" style="margin-top:10px"><h3>Antrean Perlu Diulang</h3>'+(q.length?('<ul class="queue-list">'+items+'</ul>'):'<p>Belum ada pelajaran selesai yang skornya belum sempurna.</p>')+'<p class="hint" style="margin-top:8px">Kartu di tumpukan ulang: '+state.review.length+' kartu. Jujur ya: aplikasi ini tidak menyimpan catatan per butir soal, jadi antrean ini dihitung dari <strong>skor terbaik tiap pelajaran</strong> + kartu yang masuk tumpukan ulang — bukan dari soal mana saja yang pernah kamu jawab salah.</p></div>';
+  }
+  box.innerHTML='<div class="prog-grid">'+cards+"</div>"+lists+queueHtml;
+  var qb=box.querySelectorAll("[data-start]");
+  for(var qi=0;qi<qb.length;qi++){qb[qi].addEventListener("click",function(){startLesson(this.getAttribute("data-start"));});}
   var dTotal=0,dDone=0;cats.forEach(function(c){var s=catStat(c);dTotal+=s.total;dDone+=s.done;});
   var e1=document.getElementById("darumaEye1"),e2=document.getElementById("darumaEye2"),cap=document.getElementById("darumaCaption");
   if(e1)e1.style.display=dDone>0?"":"none";
