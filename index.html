@@ -856,7 +856,7 @@ function openCatView(key){
   if(!catHist){try{history.pushState({n3cat:1},"");catHist=true;}catch(e){}}
 }
 function closeCatView(){if(catHist){catHist=false;try{history.back();return;}catch(e){}}el("catView").classList.remove("open");el("homeView").classList.remove("hidden");window.scrollTo(0,homeScrollY||0);}
-function openLessonView(){if(!el("homeView").classList.contains("hidden")){homeScrollY=window.scrollY||0;}lvReturn=el("catView").classList.contains("open")?"cat":"home";el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
+function openLessonView(){if(!el("homeView").classList.contains("hidden")){homeScrollY=window.scrollY||0;}lvReturn=el("catView").classList.contains("open")?"cat":"home";el("catView").classList.remove("open");el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
 function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
 if(window.addEventListener){window.addEventListener("popstate",function(){if(el("lessonView").classList.contains("open")){lvHist=false;closeLessonView();}else if(el("catView").classList.contains("open")){catHist=false;closeCatView();}});}
 function stopAudio(){var a=document.querySelectorAll("audio");for(var i=0;i<a.length;i++){try{a[i].pause();}catch(e){}}}
