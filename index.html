@@ -12,20 +12,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FDFCF8; --surface:#FFFFFF; --surface2:#FFF3D9; --surface3:#EEF1FF;
-  --ink:#1B2340; --muted:#5B647E; --line:#E7DFCE;
-  --accent:#C2392B; --accent-soft:#FDECEA; --indigo:#232F6B; --indigo-soft:#E8ECFF;
-  --gold:#B97A00; --gold-soft:#FFF0C7; --teal:#0C7668; --teal-soft:#E2F4F0;
-  --good:#1E7D32; --good-bg:#E6F4E7; --bad:#B3261E; --bad-bg:#FDECEA;
-  --shadow:0 10px 30px rgba(27,35,64,.10); --radius:18px;
+  --bg:#FFF8EA; --surface:#FFFDF6; --surface2:#FBEFD2; --surface3:#F3EAD3;
+  --ink:#2E2A25; --muted:#6F6154; --line:#E9DCC3;
+  --accent:#C73E2E; --accent-soft:#FBEAE6; --indigo:#3730A3; --indigo-soft:#E9E7FB;
+  --gold:#B97A00; --gold-soft:#F3E3B3; --teal:#5F7D5A; --teal-soft:#E7EDDF;
+  --good:#4C7A45; --good-bg:#EAF2E4; --bad:#B3261E; --bad-bg:#FBEAE6;
+  --shadow:0 10px 30px rgba(46,42,37,.10); --radius:18px;
+  --shu:#C73E2E; --sage:#5F7D5A; --note:#FFF1A8;
+  --washi-rose:#F2C9C4; --washi-matcha:#C9DCC0; --washi-sky:#BFD3E6; --washi-kinako:#F0DCA8;
+  --gridline:rgba(185,122,0,.055);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#0F1220; --surface:#1A1F35; --surface2:#2A2416; --surface3:#1E2547;
-    --ink:#F3F0E6; --muted:#A9AEC6; --line:#333B5E;
-    --accent:#FF7A6B; --accent-soft:#3A2326; --indigo:#9DB0FF; --indigo-soft:#232B52;
-    --gold:#FFC34D; --gold-soft:#3A2F14; --teal:#4ED3BE; --teal-soft:#14332F;
-    --good:#7BD88A; --good-bg:#17351F; --bad:#FF9A92; --bad-bg:#3A2326;
+    --bg:#211D19; --surface:#2B2620; --surface2:#38312A; --surface3:#33291F;
+    --ink:#F1E7D6; --muted:#C4B299; --line:#4A4237;
+    --accent:#FF8A75; --accent-soft:#453029; --indigo:#A5A0F0; --indigo-soft:#34305C;
+    --gold:#E3B34E; --gold-soft:#453A1E; --teal:#9DBE94; --teal-soft:#2E3A28;
+    --good:#9CCB8E; --good-bg:#2C3A26; --bad:#FF9A92; --bad-bg:#453029;
+    --note:#57491F; --gridline:rgba(241,231,214,.05);
     --shadow:0 10px 30px rgba(0,0,0,.35);
   }
   #btnBack{color:#161C3F}
@@ -80,7 +84,7 @@ section{margin-top:30px}
 .sec-head .hint{color:var(--muted);font-size:.88rem}
 .sec-desc{color:var(--muted);font-size:.94rem;margin-bottom:14px;max-width:66ch}
 .mission{background:var(--indigo);color:#fff;border-radius:20px;padding:18px}
-@media (prefers-color-scheme: dark){.mission{background:#232B52}}
+@media (prefers-color-scheme: dark){.mission{background:#38346B}}
 .mission h3{font-size:1.08rem;margin-bottom:4px}
 .mission p{opacity:.88;font-size:.93rem}
 .mission-list{display:grid;gap:10px;margin-top:14px}
@@ -217,6 +221,35 @@ audio{width:100%;height:44px}
 .guide-intro li{display:flex;gap:12px;align-items:flex-start}
 .guide-intro .g-ico{flex:0 0 28px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
 .guide-intro p{margin:2px 0 0;line-height:1.5}
+
+/* === Buku Catatan Hangat (Arah 1) + Senja (mode gelap) === */
+body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linear-gradient(90deg,var(--gridline) 1px,transparent 1px);background-size:28px 28px}
+.hero-banner{background:linear-gradient(160deg,#FFFBF0,#FFF3D6);color:var(--ink);border:1.5px solid var(--line)}
+@media (prefers-color-scheme: dark){.hero-banner{background:linear-gradient(160deg,#2E2822,#2B2620)}}
+.hb-n3{color:var(--gold)}
+.hb-skill{background:rgba(55,48,163,.06);border-color:var(--line)}
+.hb-badge{background:var(--indigo);color:#fff}
+.hb-skill:focus-visible{outline-color:var(--gold)}
+.tape{position:relative}
+.tape::before{content:"";position:absolute;top:-11px;left:26px;width:96px;height:22px;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 6px,rgba(255,255,255,0) 6px 12px);background-color:var(--washi-rose);opacity:.92;transform:rotate(-2.5deg);border-radius:2px;box-shadow:0 1px 3px rgba(46,42,37,.18);z-index:3;pointer-events:none}
+.tape-sky::before{background-color:var(--washi-sky)}
+.tape-matcha::before{background-color:var(--washi-matcha)}
+.tape-kinako::before{background-color:var(--washi-kinako)}
+.review-box{box-shadow:0 10px 24px rgba(46,42,37,.07),7px 7px 0 -2px var(--surface3)}
+.progressbar i,.prog-bar i{background:linear-gradient(90deg,#C9962E,#E9C766,#C9962E)}
+.lesson-card{border-left:5px solid var(--gold)}
+.boost-card{background:var(--note);position:relative;overflow:visible}
+.boost-card::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-1.5deg);width:72px;height:18px;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 6px,rgba(255,255,255,0) 6px 12px);background-color:var(--washi-kinako);opacity:.92;border-radius:2px;box-shadow:0 1px 3px rgba(46,42,37,.18);z-index:2;pointer-events:none}
+.cardbox{position:relative}
+.hanamaru{position:absolute;top:12px;right:14px;width:86px;height:86px;border:3px solid var(--shu);border-radius:50%;color:var(--shu);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:.76rem;line-height:1.25;transform:rotate(-8deg);opacity:.92;pointer-events:none;padding:8px}
+.hanamaru::after{content:"";position:absolute;inset:5px;border:1.5px solid var(--shu);border-radius:50%}
+.ray-note{display:flex;gap:12px;align-items:flex-start;background:var(--note);border:1px solid var(--line);border-radius:var(--radius);padding:16px;color:#4A3F14;box-shadow:var(--shadow)}
+.ray-note h3{margin-bottom:4px;font-size:1rem}
+.ray-note p{font-size:.95rem}
+@media (prefers-color-scheme: dark){.ray-note{color:var(--ink)}}
+.daruma-row{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.daruma-row p{font-size:.92rem;color:var(--muted)}
+.daruma-row strong{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -225,7 +258,7 @@ audio{width:100%;height:44px}
   <!-- HOME -->
   <div id="homeView">
     <header class="hero">
-      <div class="hero-banner" role="img" aria-label="JLPT N3 — empat skill: 語彙 kosakata, 文法 tata bahasa, 読解 membaca, 聴解 mendengar">
+      <div class="hero-banner tape" role="img" aria-label="JLPT N3 — empat skill: 語彙 kosakata, 文法 tata bahasa, 読解 membaca, 聴解 mendengar">
         <div class="hb-kicker jp">日本語能力試験</div>
         <div class="hb-title"><span class="hb-jlpt">JLPT</span><span class="hb-n3">N3</span></div>
         <div class="hb-skills">
@@ -257,8 +290,15 @@ audio{width:100%;height:44px}
       </div>
     </header>
 
+    <section aria-labelledby="noteTitle">
+      <div class="ray-note tape">
+        <img class="maker-seal" src="data:image/webp;base64,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" alt="Ray Obotz — pembuat aplikasi ini">
+        <div><h3 id="noteTitle">Catatan kecil dari Ray</h3><p id="rayNoteText"></p></div>
+      </div>
+    </section>
+
     <section aria-labelledby="methodTitle">
-      <div class="sources">
+      <div class="sources tape tape-kinako">
         <h3 id="methodTitle">Cara belajar di sini (gampang kok)</h3>
         <p>Kamu nggak perlu membaca lama-lama. Metodenya cuma berputar di 4 langkah ini:</p>
         <ol>
@@ -272,7 +312,7 @@ audio{width:100%;height:44px}
     </section>
 
     <section aria-labelledby="missionTitle">
-      <div class="mission">
+      <div class="mission tape tape-sky">
         <h3 id="missionTitle">Misi hari ini — cukup dua ini dulu</h3>
         <p>Misi berikutnya di jalurmu + satu target N3. Selesai dua-duanya, hari ini sudah menang. Sisanya bonus.</p>
         <div class="mission-list" id="missionList"></div>
@@ -282,7 +322,7 @@ audio{width:100%;height:44px}
     <section aria-labelledby="reviewTitle">
       <div class="sec-head"><h2 id="reviewTitle">Pengulangan terjadwal</h2><span class="hint">Sistem Leitner • tersimpan di browser ini</span></div>
       <p class="sec-desc">Kartu yang kamu tandai “belum hafal” atau soal yang kamu jawab salah masuk ke tumpukan ini. Tumpukan ini <strong>tersimpan di browser ini</strong>, jadi kalau kamu tutup halamannya, kartu-kartu ini akan tetap ada saat kamu buka lagi di HP &amp; browser yang sama — bisa diulang kapan saja, tidak harus habis hari ini.</p>
-      <div class="review-box">
+      <div class="review-box tape tape-matcha">
         <h3 id="reviewHeading">Tumpukan ulang: 0 kartu</h3>
         <p id="reviewText">Kerjakan satu misi dulu — kartu yang belum nempel akan berkumpul di sini buat diulang di sesi yang sama.</p>
         <div class="chips" id="reviewChips"></div>
@@ -296,6 +336,19 @@ audio{width:100%;height:44px}
     <section aria-labelledby="progresTitle">
       <div class="sec-head"><h2 id="progresTitle">Progresku — tunjukkan ke Ray</h2><span class="hint">Ringkasan per bagian, siap ditunjukkan pas ketemu atau disalin buat dikirim</span></div>
       <p class="sec-desc">Bagian mana yang sudah kamu pahami, mana yang masih perlu diulang — semuanya terangkum di sini dari progres yang tersimpan di HP ini. Persen utama hanya menghitung misi inti; latihan Mode Penguat dihitung terpisah sebagai bonus, jadi tidak membuat persen utamamu terlihat kecil.</p>
+      <div class="daruma-row">
+        <svg width="64" height="72" viewBox="0 0 64 72" role="img" aria-label="Daruma tujuan: lulus JLPT N3 Desember 2026" style="flex-shrink:0">
+          <ellipse cx="32" cy="40" rx="29" ry="30" fill="#C73E2E"/>
+          <ellipse cx="32" cy="63" rx="13" ry="7" fill="#E9C766"/>
+          <ellipse cx="32" cy="34" rx="17" ry="14" fill="#FFF6E3"/>
+          <circle cx="25" cy="32" r="5.5" fill="#FFF6E3" stroke="#2E2A25" stroke-width="1.6"/>
+          <circle cx="39" cy="32" r="5.5" fill="#FFF6E3" stroke="#2E2A25" stroke-width="1.6"/>
+          <circle id="darumaEye1" cx="25" cy="32" r="2.8" fill="#2E2A25" style="display:none"/>
+          <circle id="darumaEye2" cx="39" cy="32" r="2.8" fill="#2E2A25" style="display:none"/>
+          <path d="M24 42 q8 5 16 0" stroke="#2E2A25" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        </svg>
+        <p><strong>Daruma untuk Desember 2026.</strong> <span id="darumaCaption">Mata pertama terisi saat misi inti pertamamu selesai; mata kedua terisi saat semua misi inti tuntas — seperti daruma sungguhan: satu mata saat memasang tekad, satu mata saat tekadnya tercapai.</span></p>
+      </div>
       <div id="progresBody"></div>
       <div class="actions" style="margin-top:14px"><button class="btn btn-accent" id="btnCopySummary" type="button">Salin Ringkasan buat Ray</button><span class="hint" id="copyDone" style="align-self:center"></span></div>
     </section>
@@ -325,7 +378,7 @@ audio{width:100%;height:44px}
     </section>
 
     <section aria-labelledby="dataTitle">
-      <div class="sources">
+      <div class="sources tape tape-matcha">
         <h3 id="dataTitle">Data tersimpan &amp; pengaturan</h3>
         <p id="saveStatus">Progresmu (XP, level, misi/deck/kuis yang selesai, skor terakhir, kartu di tumpukan ulang, dan rentetan jawaban benar) tersimpan otomatis di penyimpanan lokal browser ini setiap kali ada perubahan. Tidak ada akun, tidak ada server, dan progresmu tidak dikirim ke siapa pun.</p>
         <ul>
@@ -343,7 +396,7 @@ audio{width:100%;height:44px}
     </section>
 
     <section aria-labelledby="srcTitle">
-      <div class="sources">
+      <div class="sources tape tape-sky">
         <h3 id="srcTitle">Sumber &amp; kejujuran materi</h3>
         <p>Semua soal di sini <strong>orisinal</strong> — mengikuti model soal JLPT dan bukumu, bukan soal bocoran dan bukan jiplakan buku. Tiap misi juga mencantumkan rujukannya.</p>
         <details>
@@ -878,7 +931,8 @@ function renderResult(){
   var xpLine='+'+(qXpEarned+(firstTime?20:0)+improveBonus)+' XP dari misi ini'+(improveBonus?(' • termasuk +'+improveBonus+' XP bonus karena skormu naik'):'')+(qAttempt>1?(' • percobaan ke-'+qAttempt+': XP per jawaban benar lebih kecil, supaya level naiknya jujur'):'');
   var msg=pct===100?"Sempurna. Ini yang namanya nempel.":pct>=75?"Kuat! Tinggal poles yang satu itu.":pct>=50?"Setengah nempel — kartu yang bocor sudah masuk tumpukan ulang.":"Nggak apa-apa, ini sesi pemanasan. Ulangi misi ini sekali lagi pelan-pelan, fokus ke penjelasannya.";
   var dokkaiResultHtml=(isDokkaiLesson(l)&&dokkaiAllAnswered())?dokkaiUnlockedHtml():"";
-  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Hasil misi</span><div class="result-score">'+qCorrect+'/'+total+'</div><p class="result-sub">'+esc(msg)+'</p><p class="result-sub">'+xpLine+' • Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p>'+dokkaiResultHtml+'<div class="actions"><button class="btn btn-ghost" id="btnAgain" type="button">Ulangi misi ini</button><button class="btn btn-accent" id="btnHome" type="button">Kembali ke jalur</button></div>'+(state.review.length?'<p class="result-sub" style="margin-top:14px">Ada '+state.review.length+' kartu di tumpukan ulang — tersimpan dan bisa diulang dari halaman utama kapan saja.</p>':"")+'</div>';
+  var stampHtml=(firstTime||qCorrect>prevBest||pct===100)?'<div class="hanamaru jp" aria-hidden="true">よくできました</div>':"";
+  el("lvBody").innerHTML='<div class="cardbox">'+stampHtml+'<span class="step-label">Hasil misi</span><div class="result-score">'+qCorrect+'/'+total+'</div><p class="result-sub">'+esc(msg)+'</p><p class="result-sub">'+xpLine+' • Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p>'+dokkaiResultHtml+'<div class="actions"><button class="btn btn-ghost" id="btnAgain" type="button">Ulangi misi ini</button><button class="btn btn-accent" id="btnHome" type="button">Kembali ke jalur</button></div>'+(state.review.length?'<p class="result-sub" style="margin-top:14px">Ada '+state.review.length+' kartu di tumpukan ulang — tersimpan dan bisa diulang dari halaman utama kapan saja.</p>':"")+'</div>';
   setProgress();
   el("btnAgain").addEventListener("click",function(){startLesson(l.id);});
   el("btnHome").addEventListener("click",closeLessonView);
@@ -1173,6 +1227,11 @@ function renderProgres(){
     lists='<div class="prog-card" style="margin-top:10px"><p>Belum ada misi berskor yang selesai. Kerjakan satu misi dulu \u2014 bagian terkuat dan yang perlu diulang akan muncul di sini.</p><p class="hint" style="margin-top:6px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
   }
   box.innerHTML='<div class="prog-grid">'+cards+"</div>"+lists;
+  var dTotal=0,dDone=0;cats.forEach(function(c){var s=catStat(c);dTotal+=s.total;dDone+=s.done;});
+  var e1=document.getElementById("darumaEye1"),e2=document.getElementById("darumaEye2"),cap=document.getElementById("darumaCaption");
+  if(e1)e1.style.display=dDone>0?"":"none";
+  if(e2)e2.style.display=(dTotal>0&&dDone>=dTotal)?"":"none";
+  if(cap)cap.textContent=(dTotal>0&&dDone>=dTotal)?"Kedua mata sudah terisi — semua misi inti tuntas. Tinggal jaga yang sudah nempel sampai hari ujian.":dDone>0?("Sudah "+dDone+" dari "+dTotal+" misi inti selesai — mata pertama terisi. Mata kedua menunggu misi inti terakhir."):"Mata pertama terisi saat misi inti pertamamu selesai; mata kedua terisi saat semua misi inti tuntas — seperti daruma sungguhan: satu mata saat memasang tekad, satu mata saat tekadnya tercapai.";
 }
 function copySummary(){
   var txt=summaryText(),done=document.getElementById("copyDone");
@@ -1180,6 +1239,8 @@ function copySummary(){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,function(){fallback();});}else{fallback();}
   function fallback(){var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok();}catch(e){if(done)done.textContent="Gagal menyalin otomatis \u2014 tangkap layar bagian ini saja.";}document.body.removeChild(ta);}
 }
+var RAY_NOTES=["Satu misi aja hari ini cukup. Pelan nggak apa-apa, yang penting nggak berhenti.","Kalau lagi capek, buka yang paling gampang dulu. Mulai aja, sisanya ngikut.","Yang kemarin salah itu bukan gagal — itu bahan ulang. Memang begitu cara nempelnya.","Delapan menit sekarang lebih berharga daripada dua jam yang cuma direncanain.","Kamu sudah sampai sejauh ini di bukumu. Buktiin ke diri sendiri, bukan ke siapa-siapa.","Hari ini nggak harus sempurna. Sedikit lebih bisa dari kemarin juga kemajuan.","Kalau ada materi yang terasa salah atau membingungkan, catat nomor misinya — nanti kubenerin.","Istirahat juga bagian dari belajar. Tapi sebelum istirahat, satu misi dulu ya.","Ingat kenapa mulai: Desember nanti, kamu duduk di ruang ujian itu dengan tenang.","Aku nggak bisa nemenin di ruang ujian — aplikasi ini yang nemenin dari sekarang."];
+(function(){var t=document.getElementById("rayNoteText");if(t){var d=Math.floor(Date.now()/86400000);t.textContent=RAY_NOTES[d%RAY_NOTES.length];}})();
 el("btnReview").addEventListener("click",startReview);
 var cpBtn=el("btnCopySummary");if(cpBtn)cpBtn.addEventListener("click",copySummary);
 var resetBtn=el("btnResetProgress");
