@@ -34,7 +34,7 @@
   }
   #btnBack{color:#161C3F}
 }
-html{scroll-behavior:smooth}
+html{scroll-behavior:auto}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
 .jp{font-family:"Noto Sans JP","Plus Jakarta Sans",sans-serif}
 h1,h2,h3,p{margin:0}
@@ -250,6 +250,11 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
 .daruma-row{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
 .daruma-row p{font-size:.92rem;color:var(--muted)}
 .daruma-row strong{color:var(--ink)}
+
+#catView{display:none}
+#catView.open{display:block}
+#btnCatBack{background:var(--indigo);color:#fff;border-color:var(--indigo);font-weight:800}
+@media (prefers-color-scheme: dark){#btnCatBack{color:#161C3F}}
 </style>
 </head>
 <body>
@@ -428,6 +433,18 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
       <div style="font-weight:800" id="lvStepText">1/4</div>
     </div>
     <div id="lvBody"></div>
+  </div>
+
+  <!-- CATEGORY VIEW -->
+  <div id="catView" aria-live="polite">
+    <div class="lv-top">
+      <button class="btn btn-indigo back" id="btnCatBack" type="button">← Kembali ke Beranda</button>
+      <div class="lv-progress">
+        <div style="font-weight:800;font-size:.95rem" id="catTitle">Kategori</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--muted)" id="catSub"></div>
+      </div>
+    </div>
+    <div id="catBody" style="margin-top:16px"></div>
   </div>
 
 </div>
@@ -820,9 +837,28 @@ function renderHome(){
 }
 
 var lvHist=false;
-function openLessonView(){el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
-function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,0);}
-if(window.addEventListener){window.addEventListener("popstate",function(){if(el("lessonView").classList.contains("open")){lvHist=false;closeLessonView();}});}
+var catHist=false,lvReturn="home",homeScrollY=0;
+var CAT_META={kotoba:{t:"\u{1F331} Kotoba — Kosakata",s:"Kosakata & kanji"},bunpo:{t:"\u{1F9E9} Bunp\u014D — Tata Bahasa",s:"Pola-pola kalimat"},dokkai:{t:"\u{1F4D6} Dokkai — Reading",s:"Baca teksnya, jawab soalnya"},choukai:{t:"\u{1F3A7} Ch\u014Dkai — Listening",s:"Dengarkan, lalu jawab"}};
+function skillKeyOf(l){return l.skill==="Grammar"?"bunpo":(l.skill==="Kosakata"||l.skill==="Kanji")?"kotoba":l.skill==="Listening"?"choukai":"dokkai";}
+function openCatView(key){
+  var meta=CAT_META[key];if(!meta)return;
+  var items=LESSONS.filter(function(l){return skillKeyOf(l)===key;});
+  el("catTitle").textContent=meta.t;
+  el("catSub").textContent=meta.s+" \u2022 "+items.length+" misi";
+  el("catBody").innerHTML='<div class="lesson-grid">'+items.map(function(l){
+    var done=state.done[l.id];
+    return '<button class="lesson-card" type="button" data-start="'+l.id+'"><span class="badges"><span class="badge '+(l.level==="N5"?"b-n5":l.level==="N4"?"b-n4":"b-n3")+'">'+l.level+'</span><span class="badge b-skill">'+esc(l.skill)+'</span>'+(done?'<span class="badge b-done">Selesai \u2022 '+state.scores[l.id]+'/4</span>':'')+'</span><h3>'+esc(l.title)+'</h3><div class="pattern jp">'+esc(l.pattern)+'</div><div class="meta">\u00B1'+l.minutes+' menit \u2022 3 flashcard \u2022 4 soal</div><div class="src">'+esc(l.source)+'</div></button>';
+  }).join("")+"</div>";
+  var btns=el("catBody").querySelectorAll("[data-start]");
+  for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(){startLesson(this.getAttribute("data-start"));});}
+  homeScrollY=window.scrollY||0;
+  el("homeView").classList.add("hidden");el("catView").classList.add("open");window.scrollTo(0,0);
+  if(!catHist){try{history.pushState({n3cat:1},"");catHist=true;}catch(e){}}
+}
+function closeCatView(){if(catHist){catHist=false;try{history.back();return;}catch(e){}}el("catView").classList.remove("open");el("homeView").classList.remove("hidden");window.scrollTo(0,homeScrollY||0);}
+function openLessonView(){if(!el("homeView").classList.contains("hidden")){homeScrollY=window.scrollY||0;}lvReturn=el("catView").classList.contains("open")?"cat":"home";el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
+function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
+if(window.addEventListener){window.addEventListener("popstate",function(){if(el("lessonView").classList.contains("open")){lvHist=false;closeLessonView();}else if(el("catView").classList.contains("open")){catHist=false;closeCatView();}});}
 function stopAudio(){var a=document.querySelectorAll("audio");for(var i=0;i<a.length;i++){try{a[i].pause();}catch(e){}}}
 function setProgress(){
   if(!current)return;
@@ -1151,6 +1187,7 @@ var furiBtns=document.querySelectorAll(".btnFuri");
 for(var fi=0;fi<furiBtns.length;fi++){furiBtns[fi].addEventListener("click",function(){studyMeta.furiOn=studyMeta.furiOn===false?true:false;saveProgress();applyFuri();});}
 applyFuri();
 el("btnBack").addEventListener("click",closeLessonView);
+el("btnCatBack").addEventListener("click",closeCatView);
 
 /* ===== Progresku: ringkasan per bagian + salin ringkasan ===== */
 function catUnits(){
@@ -1274,14 +1311,7 @@ var bsk=document.getElementById("btnIntroSkip");if(bsk)bsk.addEventListener("cli
 var bs=document.getElementById("btnGuideStart");if(bs)bs.addEventListener("click",closeGuide);
 if(!studyMeta.introSeen)openGuide();
 
-document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){
-  var t=b.getAttribute("data-go"),el=null;
-  if(t==="kotoba")el=document.getElementById("kotobaHead");
-  else if(t==="bunpo"){var hs2=document.querySelectorAll("#lessonGroups h3");for(var j=0;j<hs2.length;j++){if(hs2[j].textContent.indexOf("Grammar")>-1){el=hs2[j];break;}}if(!el)el=document.getElementById("bunpoHead");}
-  else{var hs=document.querySelectorAll("#lessonGroups h3");for(var i=0;i<hs.length;i++){if(t==="dokkai"&&hs[i].textContent.indexOf("Dokkai")>-1){el=hs[i];break;}if(t==="choukai"&&hs[i].textContent.indexOf("Listening")>-1){el=hs[i];break;}}}
-  if(!el)el=document.getElementById("pathTitle");
-  if(el){el.scrollIntoView({behavior:"smooth",block:"start"});el.classList.add("flash-target");setTimeout(function(){el.classList.remove("flash-target");},1800);}
-});});
+document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){openCatView(b.getAttribute("data-go"));});});
 </script>
 
 </body>
