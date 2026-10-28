@@ -983,7 +983,7 @@ function renderQuestion(){
     }
   }
   if(q.kind==="listen"){
-    el("lvBody").innerHTML=head+'<h2 class="q-prompt">'+esc(q.prompt)+'</h2>'+passageHtml+'<div class="audio-row"><p>Tekan Putar — dengarkan baik-baik (boleh diulang):</p><audio controls preload="metadata" src="'+q.audio+'"></audio></div><div class="choices" id="choices">'+q.choices.map(function(c,i){return '<button class="choice" type="button" data-choice="'+i+'">'+esc(c)+'</button>';}).join("")+'</div><div class="transcript" id="transcript"><div style="font-size:.8rem;font-weight:800;color:var(--muted)">TRANSKRIP (baru dibuka setelah menjawab)</div><div class="jp">'+fjp(q.transcript)+'</div></div><div class="explain" id="explain"></div><div class="actions hidden" id="qActions"><button class="btn btn-accent" id="btnNextQ" type="button">'+(qIndex<l.questions.length-1?"Soal berikutnya →":"Lihat hasil →")+'</button></div></div>';
+    el("lvBody").innerHTML=head+'<h2 class="q-prompt">'+esc(q.prompt)+'</h2>'+passageHtml+'<div class="audio-row"><p>Tekan Putar — dengarkan baik-baik (boleh diulang):</p><audio controls preload="metadata" src="'+q.audio+'"></audio></div><div class="choices" id="choices">'+shuffle(q.choices.map(function(c,i){return{text:c,idx:i};})).map(function(o){return '<button class="choice" type="button" data-choice="'+o.idx+'">'+esc(o.text)+'</button>';}).join("")+'</div><div class="transcript" id="transcript"><div style="font-size:.8rem;font-weight:800;color:var(--muted)">TRANSKRIP (baru dibuka setelah menjawab)</div><div class="jp">'+fjp(q.transcript)+'</div></div><div class="explain" id="explain"></div><div class="actions hidden" id="qActions"><button class="btn btn-accent" id="btnNextQ" type="button">'+(qIndex<l.questions.length-1?"Soal berikutnya →":"Lihat hasil →")+'</button></div></div>';
     bindChoices(q);
   }else if(q.kind==="arrange"){
     arrangeBuilt=[];arrangeChecked=false;
@@ -999,7 +999,7 @@ function renderQuestion(){
     });
     el("btnNextQ").addEventListener("click",nextQuestion);
   }else{
-    el("lvBody").innerHTML=head+'<h2 class="q-prompt">'+esc(q.prompt)+'</h2>'+(q.promptJp?'<div class="q-prompt-jp jp">'+fjp(q.promptJp)+'</div>':"")+passageHtml+'<div class="choices" id="choices">'+q.choices.map(function(c,i){return '<button class="choice jp" type="button" data-choice="'+i+'">'+fjp(c)+'</button>';}).join("")+'</div><div class="explain" id="explain"></div><div class="actions hidden" id="qActions"><button class="btn btn-accent" id="btnNextQ" type="button">'+(qIndex<l.questions.length-1?"Soal berikutnya →":"Lihat hasil →")+'</button></div></div>';
+    el("lvBody").innerHTML=head+'<h2 class="q-prompt">'+esc(q.prompt)+'</h2>'+(q.promptJp?'<div class="q-prompt-jp jp">'+fjp(q.promptJp)+'</div>':"")+passageHtml+'<div class="choices" id="choices">'+shuffle(q.choices.map(function(c,i){return{text:c,idx:i};})).map(function(o){return '<button class="choice jp" type="button" data-choice="'+o.idx+'">'+fjp(o.text)+'</button>';}).join("")+'</div><div class="explain" id="explain"></div><div class="actions hidden" id="qActions"><button class="btn btn-accent" id="btnNextQ" type="button">'+(qIndex<l.questions.length-1?"Soal berikutnya →":"Lihat hasil →")+'</button></div></div>';
     bindChoices(q);
   }
   setProgress();
@@ -1008,7 +1008,7 @@ function bindChoices(q){
   var btns=document.querySelectorAll("[data-choice]");
   for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(){
     var picked=parseInt(this.getAttribute("data-choice"),10);
-    for(var j=0;j<btns.length;j++){btns[j].disabled=true;if(j===q.answer)btns[j].classList.add("correct");}
+    for(var j=0;j<btns.length;j++){btns[j].disabled=true;if(parseInt(btns[j].getAttribute("data-choice"),10)===q.answer)btns[j].classList.add("correct");}
     if(picked!==q.answer)this.classList.add("wrong");
     finishQuestion(picked===q.answer,q,q.explain);
     var tr=el("transcript");if(tr)tr.classList.add("show");
