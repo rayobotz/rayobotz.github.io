@@ -194,6 +194,7 @@ audio{width:100%;height:44px}
 @media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.hero-copy h1{font-size:1.65rem}}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.progressbar i{transition:none}}
 
+.guide-overlay[hidden]{display:none!important}
 .guide-overlay{position:fixed;inset:0;background:rgba(20,16,40,.55);display:flex;align-items:flex-end;justify-content:center;z-index:60;padding:0}
 .guide-card{background:var(--card,#fff);color:var(--ink,#241f3a);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:22px 20px 26px;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
 @media(min-width:640px){.guide-overlay{align-items:center;padding:20px}.guide-card{border-radius:20px}}
@@ -362,6 +363,22 @@ audio{width:100%;height:44px}
 
 </div>
 
+<div class="guide-overlay" id="guideOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="guide-card">
+    <h2 id="guideTitle">Halo! Begini cara pakainya 👋</h2>
+    <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
+    <ol class="guide-steps">
+      <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi yang harus kamu kerjakan berikutnya. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
+      <li><span class="g-num">2</span><p><strong>Urutannya dari bawah ke atas:</strong> Review N5 → Fondasi N4 → materi N3 (Bunpō, Kotoba, Dokkai, Listening). Yang di atas di tab Jalur adalah yang dikerjakan duluan.</p></li>
+      <li><span class="g-num">3</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu kerjakan kuis / flashcard / listening-nya sampai selesai. Skor dan XP tersimpan otomatis di HP ini.</p></li>
+      <li><span class="g-num">4</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
+      <li><span class="g-num">5</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihan membacanya beneran seperti ujian.</p></li>
+      <li><span class="g-num">6</span><p><strong>Jawaban yang salah masuk tumpukan “Ulang”</strong> — sesekali kerjakan di sana biar yang lemah jadi nempel. Di tab <strong>Progres</strong> kamu bisa lihat bagian mana yang sudah nempel dan mana yang perlu diulang, dan tombol <strong>Salin Ringkasan</strong> membuat laporan belajarmu untuk dibahas bareng Ray.</p></li>
+    </ol>
+    <button class="btn btn-indigo" type="button" id="btnGuideStart" style="width:100%">Siap, mulai belajar!</button>
+    <p class="guide-note">Panduan ini muncul sekali di awal. Nanti bisa dibuka lagi kapan pun lewat tombol “Cara Main &amp; Urutan Belajar” di beranda.</p>
+  </div>
+</div>
 <script>
 "use strict";
 /* ===== DATA — original items written to official JLPT item types.
@@ -1101,21 +1118,5 @@ document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("c
 });});
 </script>
 
-<div class="guide-overlay" id="guideOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-  <div class="guide-card">
-    <h2 id="guideTitle">Halo! Begini cara pakainya 👋</h2>
-    <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
-    <ol class="guide-steps">
-      <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi yang harus kamu kerjakan berikutnya. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
-      <li><span class="g-num">2</span><p><strong>Urutannya dari bawah ke atas:</strong> Review N5 → Fondasi N4 → materi N3 (Bunpō, Kotoba, Dokkai, Listening). Yang di atas di tab Jalur adalah yang dikerjakan duluan.</p></li>
-      <li><span class="g-num">3</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu kerjakan kuis / flashcard / listening-nya sampai selesai. Skor dan XP tersimpan otomatis di HP ini.</p></li>
-      <li><span class="g-num">4</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
-      <li><span class="g-num">5</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihan membacanya beneran seperti ujian.</p></li>
-      <li><span class="g-num">6</span><p><strong>Jawaban yang salah masuk tumpukan “Ulang”</strong> — sesekali kerjakan di sana biar yang lemah jadi nempel. Di tab <strong>Progres</strong> kamu bisa lihat bagian mana yang sudah nempel dan mana yang perlu diulang, dan tombol <strong>Salin Ringkasan</strong> membuat laporan belajarmu untuk dibahas bareng Ray.</p></li>
-    </ol>
-    <button class="btn btn-indigo" type="button" id="btnGuideStart" style="width:100%">Siap, mulai belajar!</button>
-    <p class="guide-note">Panduan ini muncul sekali di awal. Nanti bisa dibuka lagi kapan pun lewat tombol “Cara Main &amp; Urutan Belajar” di beranda.</p>
-  </div>
-</div>
 </body>
 </html>
