@@ -48,6 +48,15 @@ button{font:inherit;cursor:pointer}
 .hb-skill:active{transform:scale(.96)}
 .hb-skill:focus-visible{outline:3px solid #FFC34D;outline-offset:2px}
 .flash-target{outline:3px solid var(--gold);outline-offset:5px;border-radius:10px}
+.prog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.prog-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.prog-card h3{font-size:1rem;margin-bottom:4px}
+.prog-bar{height:8px;background:var(--surface3);border-radius:99px;overflow:hidden;margin:8px 0 6px}
+.prog-bar i{display:block;height:100%;background:var(--indigo);border-radius:99px}
+.prog-status{font-weight:800}
+.prog-list{margin:10px 0 0;padding-left:18px}
+.prog-list li{margin:3px 0}
+@media(max-width:520px){.prog-grid{grid-template-columns:1fr}}
 @media(max-width:520px){.hb-jlpt{font-size:2rem}.hb-n3{font-size:3.2rem}.hb-skills{grid-template-columns:repeat(2,1fr)}}
 .hero-copy{padding:20px 2px 0}
 .eyebrow{display:inline-block;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:999px}
@@ -241,6 +250,14 @@ audio{width:100%;height:44px}
           <button class="btn btn-accent" id="btnReview" type="button" disabled>Ulang tumpukan ini sekarang</button>
         </div>
       </div>
+    </section>
+
+
+    <section aria-labelledby="progresTitle">
+      <div class="sec-head"><h2 id="progresTitle">Progresku — tunjukkan ke Ray</h2><span class="hint">Ringkasan per bagian, siap ditunjukkan pas ketemu atau disalin buat dikirim</span></div>
+      <p class="sec-desc">Bagian mana yang sudah kamu pahami, mana yang masih perlu diulang — semuanya terangkum di sini dari progres yang tersimpan di HP ini.</p>
+      <div id="progresBody"></div>
+      <div class="actions" style="margin-top:14px"><button class="btn btn-accent" id="btnCopySummary" type="button">Salin Ringkasan buat Ray</button><span class="hint" id="copyDone" style="align-self:center"></span></div>
     </section>
 
     <section aria-labelledby="pathTitle">
@@ -617,6 +634,7 @@ function renderHome(){
   var btns=document.querySelectorAll("[data-start]");
   for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(){startLesson(this.getAttribute("data-start"));});}
   renderBoost();
+  renderProgres();
 }
 
 function openLessonView(){el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);}
@@ -941,7 +959,85 @@ var furiBtns=document.querySelectorAll(".btnFuri");
 for(var fi=0;fi<furiBtns.length;fi++){furiBtns[fi].addEventListener("click",function(){studyMeta.furiOn=studyMeta.furiOn===false?true:false;saveProgress();applyFuri();});}
 applyFuri();
 el("btnBack").addEventListener("click",closeLessonView);
+
+/* ===== Progresku: ringkasan per bagian + salin ringkasan ===== */
+function catUnits(){
+  var bunpo={key:"bunpo",label:"Bunp\u014d",jp:"\u6587\u6cd5",units:[]};
+  var kotoba={key:"kotoba",label:"Kotoba",jp:"\u8a9e\u5f59",units:[]};
+  var dokkai={key:"dokkai",label:"Dokkai",jp:"\u8aad\u89e3",units:[]};
+  var choukai={key:"choukai",label:"Listening",jp:"\u8074\u89e3",units:[]};
+  LESSONS.forEach(function(l){
+    var u={id:l.id,title:l.title,done:!!state.done[l.id],score:(typeof state.scores[l.id]==="number"?state.scores[l.id]:null),max:(l.questions?l.questions.length:4)};
+    if(l.skill==="Dokkai"||l.skill==="Reading")dokkai.units.push(u);
+    else if(l.skill==="Listening")choukai.units.push(u);
+    else if(l.group==="Kosakata & Kanji N3"||l.skill==="Kosakata")kotoba.units.push(u);
+    else bunpo.units.push(u);
+  });
+  if(typeof VOCAB_CTX_LESSON!=="undefined"){kotoba.units.push({id:VOCAB_CTX_LESSON.id,title:VOCAB_CTX_LESSON.title,done:!!state.done[VOCAB_CTX_LESSON.id],score:(typeof state.scores[VOCAB_CTX_LESSON.id]==="number"?state.scores[VOCAB_CTX_LESSON.id]:null),max:VOCAB_CTX_LESSON.questions.length});}
+  GRAM_THEMES.forEach(function(t,i){
+    bunpo.units.push({id:"gd-"+i,title:"Flashcard Bunp\u014d: "+t.name,done:!!state.done["gd-"+i],score:null,max:0});
+    bunpo.units.push({id:"gq-"+i,title:"Kuis Bunp\u014d: "+t.name,done:!!state.done["gq-"+i],score:null,max:0});
+  });
+  bunpo.units.push({id:"gq-all",title:"Kuis Campuran Bunp\u014d 70",done:!!state.done["gq-all"],score:null,max:0});
+  VOCAB_CATS.forEach(function(c,i){
+    kotoba.units.push({id:"vd-"+i,title:"Flashcard Kosakata: "+c.name,done:!!state.done["vd-"+i],score:null,max:0});
+    kotoba.units.push({id:"vq-"+i,title:"Kuis Kosakata: "+c.name,done:!!state.done["vq-"+i],score:null,max:0});
+  });
+  kotoba.units.push({id:"vq-all",title:"Kuis Kosakata Campuran",done:!!state.done["vq-all"],score:null,max:0});
+  return [bunpo,kotoba,dokkai,choukai];
+}
+function catStat(c){
+  var total=c.units.length,done=c.units.filter(function(u){return u.done;}).length;
+  var sc=c.units.filter(function(u){return u.done&&u.score!==null&&u.max>0;});
+  var avg=sc.length?sc.reduce(function(a,u){return a+u.score/u.max;},0)/sc.length:null;
+  var pct=total?Math.round(done/total*100):0;
+  var status=!done?"Belum mulai":(avg!==null&&avg<0.5&&sc.length>=2)?"Perlu diulang":(pct>=60&&avg!==null&&avg>=0.75)?"Sudah nempel":"Lagi proses";
+  return {total:total,done:done,pct:pct,avg:avg,status:status};
+}
+function scoredUnits(){
+  var all=[];catUnits().forEach(function(c){c.units.forEach(function(u){if(u.done&&u.score!==null&&u.max>0)all.push(u);});});
+  return all;
+}
+function summaryText(){
+  var cats=catUnits();
+  var lines=["Progres JLPT N3-ku \ud83d\udcda ("+new Date().toLocaleDateString("id-ID")+")",
+    "Level "+levelFromXp(state.xp).level+" \u2022 "+state.xp+" XP"+(studyMeta.streakDays?(" \u2022 Rangkaian belajar: "+studyMeta.streakDays+" hari"):""),""];
+  cats.forEach(function(c){var s=catStat(c);lines.push(c.label+" ("+c.jp+"): "+s.done+"/"+s.total+" selesai ("+s.pct+"%) \u2014 "+s.status);});
+  var sc=scoredUnits().slice().sort(function(a,b){return (b.score/b.max)-(a.score/a.max);});
+  if(sc.length){
+    lines.push("","Paling nempel:");
+    sc.slice(0,3).forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});
+    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<1;}).slice(0,3);
+    if(weak.length){lines.push("","Masih perlu diulang:");weak.forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});}
+  } else { lines.push("","Belum ada misi berskor yang selesai \u2014 baru mulai."); }
+  lines.push("","Kartu di tumpukan ulang: "+state.review.length+" kartu");
+  return lines.join("\n");
+}
+function renderProgres(){
+  var box=document.getElementById("progresBody");if(!box)return;
+  var cats=catUnits();
+  var cards=cats.map(function(c){var s=catStat(c);
+    return '<div class="prog-card"><h3><span class="jp">'+esc(c.jp)+'</span> '+esc(c.label)+'</h3><div class="prog-bar"><i style="width:'+s.pct+'%"></i></div><div>'+s.done+'/'+s.total+' selesai ('+s.pct+'%) \u2014 <span class="prog-status">'+s.status+'</span></div>'+(s.avg!==null?'<div class="hint">Rata-rata skor misi: '+Math.round(s.avg*100)+'%</div>':'')+'</div>';
+  }).join("");
+  var sc=scoredUnits().slice().sort(function(a,b){return (b.score/b.max)-(a.score/a.max);});
+  var lists="";
+  if(sc.length){
+    var strong=sc.slice(0,3).map(function(u){return "<li>"+esc(u.title)+" ("+u.score+"/"+u.max+")</li>";}).join("");
+    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<1;}).slice(0,3).map(function(u){return "<li>"+esc(u.title)+" ("+u.score+"/"+u.max+")</li>";}).join("");
+    lists='<div class="prog-card" style="margin-top:10px"><h3>Paling nempel</h3><ul class="prog-list">'+strong+"</ul>"+(weak?'<h3 style="margin-top:10px">Masih perlu diulang</h3><ul class="prog-list">'+weak+"</ul>":"")+'<p class="hint" style="margin-top:8px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
+  } else {
+    lists='<div class="prog-card" style="margin-top:10px"><p>Belum ada misi berskor yang selesai. Kerjakan satu misi dulu \u2014 bagian terkuat dan yang perlu diulang akan muncul di sini.</p><p class="hint" style="margin-top:6px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
+  }
+  box.innerHTML='<div class="prog-grid">'+cards+"</div>"+lists;
+}
+function copySummary(){
+  var txt=summaryText(),done=document.getElementById("copyDone");
+  function ok(){if(done){done.textContent="Tersalin \u2713 \u2014 tinggal tempel & kirim ke Ray.";setTimeout(function(){done.textContent="";},4000);}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,function(){fallback();});}else{fallback();}
+  function fallback(){var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok();}catch(e){if(done)done.textContent="Gagal menyalin otomatis \u2014 tangkap layar bagian ini saja.";}document.body.removeChild(ta);}
+}
 el("btnReview").addEventListener("click",startReview);
+var cpBtn=el("btnCopySummary");if(cpBtn)cpBtn.addEventListener("click",copySummary);
 var resetBtn=el("btnResetProgress");
 if(resetBtn){resetBtn.addEventListener("click",function(){
   if(!window.confirm("Hapus SEMUA progres tersimpan? XP, misi selesai, skor, dan tumpukan ulang akan kembali ke nol."))return;
