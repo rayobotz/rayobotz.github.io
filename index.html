@@ -283,7 +283,7 @@ audio{width:100%;height:44px}
 
     <section aria-labelledby="progresTitle">
       <div class="sec-head"><h2 id="progresTitle">Progresku — tunjukkan ke Ray</h2><span class="hint">Ringkasan per bagian, siap ditunjukkan pas ketemu atau disalin buat dikirim</span></div>
-      <p class="sec-desc">Bagian mana yang sudah kamu pahami, mana yang masih perlu diulang — semuanya terangkum di sini dari progres yang tersimpan di HP ini.</p>
+      <p class="sec-desc">Bagian mana yang sudah kamu pahami, mana yang masih perlu diulang — semuanya terangkum di sini dari progres yang tersimpan di HP ini. Persen utama hanya menghitung misi inti; latihan Mode Penguat dihitung terpisah sebagai bonus, jadi tidak membuat persen utamamu terlihat kecil.</p>
       <div id="progresBody"></div>
       <div class="actions" style="margin-top:14px"><button class="btn btn-accent" id="btnCopySummary" type="button">Salin Ringkasan buat Ray</button><span class="hint" id="copyDone" style="align-self:center"></span></div>
     </section>
@@ -611,7 +611,7 @@ function levelFromXp(xp){var lv=1,i;for(i=0;i<THRESH.length;i++){if(xp>=THRESH[i
    Semua progres disimpan di browser pengguna di perangkat yang sama.
    Tidak dikirim ke server / siapa pun. */
 var STORAGE_KEY="aplikasi-belajar-n3:progress:v1";
-var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0};
+var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{}};
 var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,guideSeen:false};
 var state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
@@ -619,12 +619,12 @@ function todayStr(){var d=new Date();var m=("0"+(d.getMonth()+1)).slice(-2);var 
 function yesterdayStr(){var d=new Date();d.setDate(d.getDate()-1);var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
 function markStudyToday(){var today=todayStr();if(studyMeta.lastStudyDate===today)return;if(studyMeta.lastStudyDate===yesterdayStr()){studyMeta.streakDays=(studyMeta.streakDays||0)+1;}else{studyMeta.streakDays=1;}studyMeta.lastStudyDate=today;}
 function saveProgress(){try{studyMeta.savedAt=new Date().toISOString();studyMeta.lastOpenedAt=studyMeta.savedAt;var payload={version:1,state:state,meta:studyMeta};localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));var sh=document.getElementById("saveHint");if(sh){sh.textContent="Tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari"):"")+" • Terakhir disimpan: "+new Date().toLocaleString("id-ID");}var ss=document.getElementById("saveStatus");if(ss&&studyMeta.savedAt){/* keep base text; status shown via saveHint */}}catch(e){/* storage penuh / mode privat — aplikasi tetap jalan tanpa menyimpan */}}
-function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=Array.isArray(data.state.review)?data.state.review:[];state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
+function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=Array.isArray(data.state.review)?data.state.review:[];state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
 loadProgress();
 (function(){var now=new Date().toISOString();if(!studyMeta.firstOpenedAt)studyMeta.firstOpenedAt=now;studyMeta.lastOpenedAt=now;studyMeta.totalOpens=(studyMeta.totalOpens||0)+1;})();
 window.addEventListener("beforeunload",function(){try{saveProgress();}catch(e){}});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){try{saveProgress();}catch(e){}}});
-var current=null,step=0,fcIndex=0,fcFlipped=false,qIndex=0,qCorrect=0,qAnswered=0,arrangeBuilt=[],arrangeChecked=false,reviewMode=false,reviewCards=[],reviewIdx=0;
+var current=null,step=0,fcIndex=0,fcFlipped=false,qIndex=0,qCorrect=0,qAnswered=0,arrangeBuilt=[],arrangeChecked=false,reviewMode=false,reviewCards=[],reviewIdx=0,qAttempt=1,qXpEarned=0;
 
 function el(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
@@ -637,8 +637,54 @@ function dokkaiUnlockedHtml(){var l=current;if(!l)return "";var h='<div class="d
 function applyFuri(){var off=studyMeta.furiOn===false;document.body.classList.toggle("furi-off",off);var bs=document.querySelectorAll(".btnFuri");for(var i=0;i<bs.length;i++){bs[i].textContent="Furigana: "+(off?"sembunyi":"tampil");}}
 function shuffle(a){var b=a.slice(),i,j,t;for(i=b.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=b[i];b[i]=b[j];b[j]=t;}return b;}
 function lessonById(id){for(var i=0;i<LESSONS.length;i++)if(LESSONS[i].id===id)return LESSONS[i];return null;}
+/* Aturan XP anti-ternak: percobaan pertama sebuah misi/kuis/deck dihargai penuh.
+   Pengulangan tetap dapat XP kecil per jawaban benar, plus bonus bila skor terbaik
+   naik — jadi mengulang tetap terasa dihargai, tapi level tidak bisa dinaikkan
+   hanya dengan memutar soal mudah yang sama. */
+function beginAttempt(id){if(!state.attempts)state.attempts={};state.attempts[id]=(state.attempts[id]||0)+1;return state.attempts[id];}
+function xpPerCorrect(){return qAttempt<=1?10:3;}
 function addReview(card){for(var i=0;i<state.review.length;i++)if(state.review[i].front===card.front)return;state.review.push(card);saveProgress();}
 function removeReview(front){state.review=state.review.filter(function(c){return c.front!==front;});saveProgress();}
+/* Kartu ulang dipilih dari ISI soal yang salah — bukan lagi dari nomor/posisi soal.
+   Urutan: (1) kartu yang ditempel langsung ke soal (kuis ter-generate), (2) flashcard
+   pelajaran yang materinya benar-benar muncul di soal/pembahasan, (3) kartu baru yang
+   dibuat dari jawaban benar soal itu sendiri. */
+function stripFuri(s){return String(s||"").replace(/《[^》]*》/g,"");}
+function normText(s){return stripFuri(s).toLowerCase().replace(/[\s　、。・:：;；!！?？（）()「」『』【】\[\]"'〜~・\/]/g,"");}
+function lcsLen(a,b){var best=0,i,j,k;for(i=0;i<a.length;i++){for(j=0;j<b.length;j++){k=0;while(i+k<a.length&&j+k<b.length&&a[i+k]===b[j+k])k++;if(k>best)best=k;}}return best;}
+function questionHaystack(q){
+  var parts=[q.prompt||"",q.promptJp||"",q.explain||"",q.answerJp||"",q.transcript||""];
+  if(q.choices&&typeof q.answer==="number"&&q.choices[q.answer])parts.push(q.choices[q.answer]);
+  if(q.tokens)parts.push(q.tokens.join(""));
+  return normText(parts.join(" "));
+}
+function matchReviewCard(q){
+  if(q.reviewCard)return q.reviewCard;
+  var cards=(current&&current.cards)||[];
+  if(!cards.length)return null;
+  var hay=questionHaystack(q),best=null,bestScore=0,i,c,front,rd,score,l;
+  for(i=0;i<cards.length;i++){
+    c=cards[i];front=normText(c.front);if(!front)continue;score=0;
+    if(front.length>=2&&hay.indexOf(front)>=0)score=100+front.length;
+    else{l=lcsLen(front,hay);if(l>=5)score=l*2;}
+    rd=normText(c.reading);
+    if(rd&&rd!==front&&rd.length>=3&&hay.indexOf(rd)>=0)score=Math.max(score,50+rd.length);
+    if(score>bestScore){bestScore=score;best=c;}
+  }
+  return (best&&bestScore>=10)?best:null;
+}
+function synthReviewCard(q){
+  var ans=(q.choices&&typeof q.answer==="number")?String(q.choices[q.answer]):"";
+  var front="",m;
+  if(q.kind==="listen"&&q.transcript)front=stripFuri(q.transcript);
+  else if(q.kind==="arrange"&&q.answerJp)front=q.answerJp;
+  else if(q.explain&&(m=stripFuri(q.explain).match(/^([一-龯ぁ-んァ-ヶ〜・]{2,12})(?=[\s（(=は、])/)))front=m[1];
+  else if(ans&&/[一-龯ぁ-んァ-ヶ]/.test(ans)&&ans.length<=40)front=stripFuri(ans);
+  else if(q.promptJp&&q.promptJp.length<=48)front=stripFuri(ans?q.promptJp.replace("（　）",ans):q.promptJp);
+  else front=current?(current.pattern||current.title):"Materi ini";
+  return {front:front,reading:current?current.title:"",meaning:"Jawaban benar: "+(ans||q.answerJp||"")+" — "+(q.explain||"")};
+}
+function queueReviewFor(q){var c=matchReviewCard(q)||synthReviewCard(q);if(c)addReview(c);}
 
 function renderHome(){
   el("statXp").textContent=state.xp;
@@ -695,7 +741,7 @@ function setProgress(){
   el("lvStepText").textContent=(step===0?"Baca kilat":step===1?"Flashcard":step===2?"Soal "+(qIndex+1)+"/"+current.questions.length:"Hasil");
   el("lvTitle").textContent=current.title;
 }
-function startLesson(id){current=lessonById(id);step=0;fcIndex=0;fcFlipped=false;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderStep();}
+function startLesson(id){current=lessonById(id);qAttempt=beginAttempt(id);qXpEarned=0;saveProgress();step=0;fcIndex=0;fcFlipped=false;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderStep();}
 function renderStep(){setProgress();if(step===0)renderIntro();else if(step===1)renderCards();else if(step===2)renderQuestion();else renderResult();}
 
 function renderIntro(){
@@ -772,11 +818,11 @@ function bindChoices(q){
 function finishQuestion(ok,q,explainText){
   qAnswered++;
   if(ok){qCorrect++;state.correctStreak++;}
-  else{state.correctStreak=0;if(current.cards&&current.cards.length){addReview(current.cards[qIndex%current.cards.length]);}}
+  else{state.correctStreak=0;queueReviewFor(q);}
   var ex=el("explain");ex.className="explain show "+(ok?"ok":"no");
-  if(isDokkaiLesson(current)&&!dokkaiAllAnswered()){ex.innerHTML="<strong>"+(ok?"Betul! +10 XP":"Belum tepat.")+"</strong> Pembahasan soal ini masih terkunci — terbuka setelah semua soal di teks ini selesai dijawab.";}
-  else{ex.innerHTML="<strong>"+(ok?"Betul! +10 XP":"Belum tepat.")+"</strong> "+fjp(explainText);}
-  if(ok){state.xp+=10;markStudyToday();}
+  if(isDokkaiLesson(current)&&!dokkaiAllAnswered()){ex.innerHTML="<strong>"+(ok?("Betul! +"+xpPerCorrect()+" XP"):"Belum tepat.")+"</strong> Pembahasan soal ini masih terkunci — terbuka setelah semua soal di teks ini selesai dijawab.";}
+  else{ex.innerHTML="<strong>"+(ok?("Betul! +"+xpPerCorrect()+" XP"):"Belum tepat.")+"</strong> "+fjp(explainText);}
+  if(ok){var gain=xpPerCorrect();state.xp+=gain;qXpEarned+=gain;markStudyToday();}
   saveProgress();
   if(isDokkaiLesson(current)&&dokkaiAllAnswered()){var slot=el("dokkaiSlot");if(slot){slot.innerHTML=dokkaiUnlockedHtml();}var lk=el("dokkaiLocked");if(lk){lk.style.display="none";}}
   el("qActions").classList.remove("hidden");
@@ -786,12 +832,14 @@ function nextQuestion(){stopAudio();if(qIndex<current.questions.length-1){qIndex
 function renderResult(){
   var l=current,total=l.questions.length,pct=Math.round(qCorrect/total*100);
   var firstTime=!state.done[l.id];
+  var prevBest=state.scores[l.id]||0,improveBonus=0;
   if(firstTime){state.done[l.id]=true;state.scores[l.id]=qCorrect;state.xp+=20;markStudyToday();}
-  else if(qCorrect>(state.scores[l.id]||0)){state.scores[l.id]=qCorrect;}
+  else if(qCorrect>prevBest){improveBonus=(qCorrect-prevBest)*5;state.scores[l.id]=qCorrect;state.xp+=improveBonus;markStudyToday();}
   saveProgress();
+  var xpLine='+'+(qXpEarned+(firstTime?20:0)+improveBonus)+' XP dari misi ini'+(improveBonus?(' • termasuk +'+improveBonus+' XP bonus karena skormu naik'):'')+(qAttempt>1?(' • percobaan ke-'+qAttempt+': XP per jawaban benar lebih kecil, supaya level naiknya jujur'):'');
   var msg=pct===100?"Sempurna. Ini yang namanya nempel.":pct>=75?"Kuat! Tinggal poles yang satu itu.":pct>=50?"Setengah nempel — kartu yang bocor sudah masuk tumpukan ulang.":"Nggak apa-apa, ini sesi pemanasan. Ulangi misi ini sekali lagi pelan-pelan, fokus ke penjelasannya.";
   var dokkaiResultHtml=(isDokkaiLesson(l)&&dokkaiAllAnswered())?dokkaiUnlockedHtml():"";
-  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Hasil misi</span><div class="result-score">'+qCorrect+'/'+total+'</div><p class="result-sub">'+esc(msg)+'</p><p class="result-sub">+'+(qCorrect*10+(firstTime?20:0))+' XP dari misi ini • Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p>'+dokkaiResultHtml+'<div class="actions"><button class="btn btn-ghost" id="btnAgain" type="button">Ulangi misi ini</button><button class="btn btn-accent" id="btnHome" type="button">Kembali ke jalur</button></div>'+(state.review.length?'<p class="result-sub" style="margin-top:14px">Ada '+state.review.length+' kartu di tumpukan ulang — tersimpan dan bisa diulang dari halaman utama kapan saja.</p>':"")+'</div>';
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Hasil misi</span><div class="result-score">'+qCorrect+'/'+total+'</div><p class="result-sub">'+esc(msg)+'</p><p class="result-sub">'+xpLine+' • Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p>'+dokkaiResultHtml+'<div class="actions"><button class="btn btn-ghost" id="btnAgain" type="button">Ulangi misi ini</button><button class="btn btn-accent" id="btnHome" type="button">Kembali ke jalur</button></div>'+(state.review.length?'<p class="result-sub" style="margin-top:14px">Ada '+state.review.length+' kartu di tumpukan ulang — tersimpan dan bisa diulang dari halaman utama kapan saja.</p>':"")+'</div>';
   setProgress();
   el("btnAgain").addEventListener("click",function(){startLesson(l.id);});
   el("btnHome").addEventListener("click",closeLessonView);
@@ -931,7 +979,7 @@ var deckState=null;
 function gramCards(t){return t.items.map(function(it){return{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId};});}
 function vocabCards(c){return c.words.map(function(w){return{front:w.w,reading:w.r,meaning:w.m};});}
 function startDeck(title,cards,doneId){
-  deckState={title:title,cards:cards,idx:0,doneId:doneId,known:0};
+  deckState={title:title,cards:cards,idx:0,doneId:doneId,known:0,attempt:beginAttempt(doneId)};saveProgress();
   reviewMode=false;current={id:doneId,title:title,questions:[],cards:cards};
   fcFlipped=false;openLessonView();renderDeckCard();
 }
@@ -941,21 +989,24 @@ function renderDeckCard(){
   el("lvBar").style.width=Math.round((d.idx)/d.cards.length*100)+"%";
   el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Flashcard penguat • '+(d.idx+1)+'/'+d.cards.length+'</span><h2>Tebak dulu di kepala, baru balik kartunya</h2><button class="flashcard" id="fcCard" type="button" aria-label="Flashcard, ketuk untuk membalik"><div class="front jp">'+esc(c.front)+'</div>'+(fcFlipped?'<div class="reading">'+esc(c.reading)+'</div><div class="meaning">'+esc(c.meaning)+'</div>':'<div class="tap">Ketuk kartu buat lihat arti &amp; contohnya</div>')+'</button><div class="fc-nav"><button class="btn btn-ghost" id="btnDNo" type="button">Belum hafal — masuk tumpukan ulang</button><button class="btn btn-accent" id="btnDYes" type="button">Sudah hafal</button></div></div>';
   el("fcCard").addEventListener("click",function(){fcFlipped=!fcFlipped;renderDeckCard();});
-  el("btnDYes").addEventListener("click",function(){removeReview(c.front);d.known++;state.xp+=2;markStudyToday();saveProgress();nextDeck();});
+  el("btnDYes").addEventListener("click",function(){removeReview(c.front);d.known++;if(d.attempt<=1){state.xp+=2;}markStudyToday();saveProgress();nextDeck();});
   el("btnDNo").addEventListener("click",function(){addReview(c);nextDeck();});
 }
 function nextDeck(){
   var d=deckState;fcFlipped=false;
   if(d.idx<d.cards.length-1){d.idx++;renderDeckCard();return;}
   var firstTime=!state.done[d.doneId];
+  var prevKnown=state.scores[d.doneId]||0,deckBonus=0;
   if(firstTime){state.done[d.doneId]=true;state.xp+=20;markStudyToday();}
+  else if(d.known>prevKnown){deckBonus=10;state.xp+=10;markStudyToday();}
+  if(d.known>prevKnown)state.scores[d.doneId]=d.known;
   saveProgress();
   el("lvBar").style.width="100%";el("lvStepText").textContent="Selesai";
-  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Deck selesai</span><div class="result-score">'+d.known+'/'+d.cards.length+'</div><p class="result-sub">Kartu yang sudah hafal di deck ini.'+(firstTime?' +20 XP bonus menyelesaikan deck.':'')+' Yang belum hafal ('+(d.cards.length-d.known)+' kartu) sudah masuk tumpukan ulang tersimpan di halaman utama.</p><p class="result-sub">Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p><div class="actions"><button class="btn btn-ghost" id="btnDeckAgain" type="button">Ulangi deck</button><button class="btn btn-accent" id="btnDeckHome" type="button">Kembali</button></div></div>';
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Deck selesai</span><div class="result-score">'+d.known+'/'+d.cards.length+'</div><p class="result-sub">Kartu yang sudah hafal di deck ini.'+(firstTime?' +20 XP bonus menyelesaikan deck.':deckBonus?' +10 XP bonus karena jumlah hafalmu naik dari sebelumnya.':'')+(d.attempt>1?' Pengulangan deck: XP per kartu hanya dihitung di percobaan pertama, supaya level naiknya jujur.':'')+' Yang belum hafal ('+(d.cards.length-d.known)+' kartu) sudah masuk tumpukan ulang tersimpan di halaman utama.</p><p class="result-sub">Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p><div class="actions"><button class="btn btn-ghost" id="btnDeckAgain" type="button">Ulangi deck</button><button class="btn btn-accent" id="btnDeckHome" type="button">Kembali</button></div></div>';
   el("btnDeckAgain").addEventListener("click",function(){startDeck(d.title,d.cards,d.doneId);});
   el("btnDeckHome").addEventListener("click",closeLessonView);
 }
-function startQuizOnly(qs,cards,title,id){current={id:id,title:title,questions:qs,cards:cards,source:"",pattern:"",introTitle:"",intro:"",exampleJp:"",exampleId:""};step=2;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderQuestion();}
+function startQuizOnly(qs,cards,title,id){current={id:id,title:title,questions:qs,cards:cards,source:"",pattern:"",introTitle:"",intro:"",exampleJp:"",exampleId:""};qAttempt=beginAttempt(id);qXpEarned=0;saveProgress();step=2;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderQuestion();}
 function pickOthers(pool,self,n,key){var others=pool.filter(function(x){return x!==self;});return shuffle(others).slice(0,n).map(function(x){return x[key];});}
 function mkChoices(correct,distractors){var all=shuffle([correct].concat(distractors));return{choices:all,answer:all.indexOf(correct)};}
 function gramQuiz(themeIdx){
@@ -964,9 +1015,9 @@ function gramQuiz(themeIdx){
   else{var t=GRAM_THEMES[themeIdx];items=t.items;arranges=t.arrange;title="Kuis Bunpō — "+t.name;id="gq-"+themeIdx;cards=gramCards(t);}
   var pool=shuffle(items),qs=[],i,it,mc,type;
   for(i=0;i<8;i++){it=pool[i%pool.length];type=i%3;
-    if(type===0){mc=mkChoices(it.m,pickOthers(items,it,3,"m"));qs.push({kind:"choice",prompt:"Apa arti pola 「"+it.p+"」?",choices:mc.choices,answer:mc.answer,explain:"「"+it.p+"」= "+it.m+". Contoh: "+it.ex+" ("+it.exId+")"});}
-    else if(type===1){mc=mkChoices(it.ex,pickOthers(items,it,3,"ex"));qs.push({kind:"choice",prompt:"Kalimat mana yang memakai pola 「"+it.p+"」("+it.m+")?",choices:mc.choices,answer:mc.answer,explain:"Kalimat itu memakai "+it.p+": "+it.exId});}
-    else{mc=mkChoices(it.p,pickOthers(items,it,3,"p"));qs.push({kind:"choice",prompt:"Pola mana yang artinya ‘"+it.m+"’?",choices:mc.choices,answer:mc.answer,explain:"Pola itu "+it.p+". Contoh: "+it.ex+" ("+it.exId+")"});}
+    if(type===0){mc=mkChoices(it.m,pickOthers(items,it,3,"m"));qs.push({kind:"choice",prompt:"Apa arti pola 「"+it.p+"」?",choices:mc.choices,answer:mc.answer,explain:"「"+it.p+"」= "+it.m+". Contoh: "+it.ex+" ("+it.exId+")",reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
+    else if(type===1){mc=mkChoices(it.ex,pickOthers(items,it,3,"ex"));qs.push({kind:"choice",prompt:"Kalimat mana yang memakai pola 「"+it.p+"」("+it.m+")?",choices:mc.choices,answer:mc.answer,explain:"Kalimat itu memakai "+it.p+": "+it.exId,reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
+    else{mc=mkChoices(it.p,pickOthers(items,it,3,"p"));qs.push({kind:"choice",prompt:"Pola mana yang artinya ‘"+it.m+"’?",choices:mc.choices,answer:mc.answer,explain:"Pola itu "+it.p+". Contoh: "+it.ex+" ("+it.exId+")",reviewCard:{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId}});}
   }
   shuffle(arranges).slice(0,2).forEach(function(a){qs.push({kind:"arrange",prompt:a.prompt,tokens:a.tokens,answerJp:a.answerJp,explain:a.explain});});
   startQuizOnly(qs,cards,title,id);
@@ -977,13 +1028,13 @@ function vocabQuiz(catIdx){
   else{var c=VOCAB_CATS[catIdx];words=c.words;title="Kuis Kosakata — "+c.name;id="vq-"+catIdx;cards=vocabCards(c);}
   var pool=shuffle(words),qs=[],i,w,mc,type;
   for(i=0;i<8;i++){w=pool[i%pool.length];type=i%3;
-    if(type===0){mc=mkChoices(w.r,pickOthers(words,w,3,"r"));qs.push({kind:"choice",prompt:"漢字読み — cara baca 「"+w.w+"」?",choices:mc.choices,answer:mc.answer,explain:w.w+" dibaca "+w.r+" — "+w.m+"."});}
-    else if(type===1){mc=mkChoices(w.m,pickOthers(words,w,3,"m"));qs.push({kind:"choice",prompt:"Apa arti 「"+w.w+"」("+w.r+")?",choices:mc.choices,answer:mc.answer,explain:w.w+" ("+w.r+") = "+w.m+"."});}
-    else{mc=mkChoices(w.w,pickOthers(words,w,3,"w"));qs.push({kind:"choice",prompt:"Kata mana yang artinya ‘"+w.m+"’?",choices:mc.choices,answer:mc.answer,explain:"「"+w.w+"」("+w.r+") = "+w.m+"."});}
+    if(type===0){mc=mkChoices(w.r,pickOthers(words,w,3,"r"));qs.push({kind:"choice",prompt:"漢字読み — cara baca 「"+w.w+"」?",choices:mc.choices,answer:mc.answer,explain:w.w+" dibaca "+w.r+" — "+w.m+".",reviewCard:{front:w.w,reading:w.r,meaning:w.m}});}
+    else if(type===1){mc=mkChoices(w.m,pickOthers(words,w,3,"m"));qs.push({kind:"choice",prompt:"Apa arti 「"+w.w+"」("+w.r+")?",choices:mc.choices,answer:mc.answer,explain:w.w+" ("+w.r+") = "+w.m+".",reviewCard:{front:w.w,reading:w.r,meaning:w.m}});}
+    else{mc=mkChoices(w.w,pickOthers(words,w,3,"w"));qs.push({kind:"choice",prompt:"Kata mana yang artinya ‘"+w.m+"’?",choices:mc.choices,answer:mc.answer,explain:"「"+w.w+"」("+w.r+") = "+w.m+".",reviewCard:{front:w.w,reading:w.r,meaning:w.m}});}
   }
   startQuizOnly(qs,cards,title,id);
 }
-function startCtxLesson(){current=VOCAB_CTX_LESSON;step=0;fcIndex=0;fcFlipped=false;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderStep();}
+function startCtxLesson(){qAttempt=beginAttempt(VOCAB_CTX_LESSON.id);qXpEarned=0;saveProgress();current=VOCAB_CTX_LESSON;step=0;fcIndex=0;fcFlipped=false;qIndex=0;qCorrect=0;qAnswered=0;reviewMode=false;openLessonView();renderStep();}
 function renderBoost(){
   var gEl=el("boostGrammar"),vEl=el("boostVocab");if(!gEl||!vEl)return;
   gEl.innerHTML=GRAM_THEMES.map(function(t,i){
@@ -1015,32 +1066,37 @@ function catUnits(){
   var dokkai={key:"dokkai",label:"Dokkai",jp:"\u8aad\u89e3",units:[]};
   var choukai={key:"choukai",label:"Listening",jp:"\u8074\u89e3",units:[]};
   LESSONS.forEach(function(l){
-    var u={id:l.id,title:l.title,done:!!state.done[l.id],score:(typeof state.scores[l.id]==="number"?state.scores[l.id]:null),max:(l.questions?l.questions.length:4)};
+    var u={id:l.id,title:l.title,core:true,done:!!state.done[l.id],score:(typeof state.scores[l.id]==="number"?state.scores[l.id]:null),max:(l.questions?l.questions.length:4)};
     if(l.skill==="Dokkai"||l.skill==="Reading")dokkai.units.push(u);
     else if(l.skill==="Listening")choukai.units.push(u);
     else if(l.group==="Kosakata & Kanji N3"||l.skill==="Kosakata")kotoba.units.push(u);
     else bunpo.units.push(u);
   });
-  if(typeof VOCAB_CTX_LESSON!=="undefined"){kotoba.units.push({id:VOCAB_CTX_LESSON.id,title:VOCAB_CTX_LESSON.title,done:!!state.done[VOCAB_CTX_LESSON.id],score:(typeof state.scores[VOCAB_CTX_LESSON.id]==="number"?state.scores[VOCAB_CTX_LESSON.id]:null),max:VOCAB_CTX_LESSON.questions.length});}
+  if(typeof VOCAB_CTX_LESSON!=="undefined"){kotoba.units.push({id:VOCAB_CTX_LESSON.id,title:VOCAB_CTX_LESSON.title,core:true,done:!!state.done[VOCAB_CTX_LESSON.id],score:(typeof state.scores[VOCAB_CTX_LESSON.id]==="number"?state.scores[VOCAB_CTX_LESSON.id]:null),max:VOCAB_CTX_LESSON.questions.length});}
   GRAM_THEMES.forEach(function(t,i){
-    bunpo.units.push({id:"gd-"+i,title:"Flashcard Bunp\u014d: "+t.name,done:!!state.done["gd-"+i],score:null,max:0});
-    bunpo.units.push({id:"gq-"+i,title:"Kuis Bunp\u014d: "+t.name,done:!!state.done["gq-"+i],score:null,max:0});
+    bunpo.units.push({id:"gd-"+i,title:"Flashcard Bunp\u014d: "+t.name,core:false,done:!!state.done["gd-"+i],score:null,max:0});
+    bunpo.units.push({id:"gq-"+i,title:"Kuis Bunp\u014d: "+t.name,core:false,done:!!state.done["gq-"+i],score:null,max:0});
   });
-  bunpo.units.push({id:"gq-all",title:"Kuis Campuran Bunp\u014d 70",done:!!state.done["gq-all"],score:null,max:0});
+  bunpo.units.push({id:"gq-all",title:"Kuis Campuran Bunp\u014d 70",core:false,done:!!state.done["gq-all"],score:null,max:0});
   VOCAB_CATS.forEach(function(c,i){
-    kotoba.units.push({id:"vd-"+i,title:"Flashcard Kosakata: "+c.name,done:!!state.done["vd-"+i],score:null,max:0});
-    kotoba.units.push({id:"vq-"+i,title:"Kuis Kosakata: "+c.name,done:!!state.done["vq-"+i],score:null,max:0});
+    kotoba.units.push({id:"vd-"+i,title:"Flashcard Kosakata: "+c.name,core:false,done:!!state.done["vd-"+i],score:null,max:0});
+    kotoba.units.push({id:"vq-"+i,title:"Kuis Kosakata: "+c.name,core:false,done:!!state.done["vq-"+i],score:null,max:0});
   });
-  kotoba.units.push({id:"vq-all",title:"Kuis Kosakata Campuran",done:!!state.done["vq-all"],score:null,max:0});
+  kotoba.units.push({id:"vq-all",title:"Kuis Kosakata Campuran",core:false,done:!!state.done["vq-all"],score:null,max:0});
   return [bunpo,kotoba,dokkai,choukai];
 }
 function catStat(c){
-  var total=c.units.length,done=c.units.filter(function(u){return u.done;}).length;
-  var sc=c.units.filter(function(u){return u.done&&u.score!==null&&u.max>0;});
+  /* Persen & status utama hanya dari unit INTI (misi pelajaran). Unit Mode Penguat
+     dihitung terpisah sebagai bonus — tidak lagi menyeret persen utama ke bawah. */
+  var core=c.units.filter(function(u){return u.core!==false;});
+  var extra=c.units.filter(function(u){return u.core===false;});
+  var total=core.length,done=core.filter(function(u){return u.done;}).length;
+  var sc=core.filter(function(u){return u.done&&u.score!==null&&u.max>0;});
   var avg=sc.length?sc.reduce(function(a,u){return a+u.score/u.max;},0)/sc.length:null;
   var pct=total?Math.round(done/total*100):0;
   var status=!done?"Belum mulai":(avg!==null&&avg<0.5&&sc.length>=2)?"Perlu diulang":(pct>=60&&avg!==null&&avg>=0.75)?"Sudah nempel":"Lagi proses";
-  return {total:total,done:done,pct:pct,avg:avg,status:status};
+  var extraDone=extra.filter(function(u){return u.done;}).length;
+  return {total:total,done:done,pct:pct,avg:avg,status:status,extraTotal:extra.length,extraDone:extraDone};
 }
 function scoredUnits(){
   var all=[];catUnits().forEach(function(c){c.units.forEach(function(u){if(u.done&&u.score!==null&&u.max>0)all.push(u);});});
@@ -1050,7 +1106,7 @@ function summaryText(){
   var cats=catUnits();
   var lines=["Progres JLPT N3-ku \ud83d\udcda ("+new Date().toLocaleDateString("id-ID")+")",
     "Level "+levelFromXp(state.xp).level+" \u2022 "+state.xp+" XP"+(studyMeta.streakDays?(" \u2022 Rangkaian belajar: "+studyMeta.streakDays+" hari"):""),""];
-  cats.forEach(function(c){var s=catStat(c);lines.push(c.label+" ("+c.jp+"): "+s.done+"/"+s.total+" selesai ("+s.pct+"%) \u2014 "+s.status);});
+  cats.forEach(function(c){var s=catStat(c);lines.push(c.label+" ("+c.jp+"): "+s.done+"/"+s.total+" selesai ("+s.pct+"%) \u2014 "+s.status+(s.extraTotal?(" • penguat "+s.extraDone+"/"+s.extraTotal):""));});
   var sc=scoredUnits().slice().sort(function(a,b){return (b.score/b.max)-(a.score/a.max);});
   var strongL=sc.filter(function(u){return u.score/u.max>=0.75;}).slice(0,3);
   if(strongL.length){
@@ -1066,7 +1122,7 @@ function renderProgres(){
   var box=document.getElementById("progresBody");if(!box)return;
   var cats=catUnits();
   var cards=cats.map(function(c){var s=catStat(c);
-    return '<div class="prog-card"><h3><span class="jp">'+esc(c.jp)+'</span> '+esc(c.label)+'</h3><div class="prog-bar"><i style="width:'+s.pct+'%"></i></div><div>'+s.done+'/'+s.total+' selesai ('+s.pct+'%) \u2014 <span class="prog-status">'+s.status+'</span></div>'+(s.avg!==null?'<div class="hint">Rata-rata skor misi: '+Math.round(s.avg*100)+'%</div>':'')+'</div>';
+    return '<div class="prog-card"><h3><span class="jp">'+esc(c.jp)+'</span> '+esc(c.label)+'</h3><div class="prog-bar"><i style="width:'+s.pct+'%"></i></div><div>'+s.done+'/'+s.total+' selesai ('+s.pct+'%) \u2014 <span class="prog-status">'+s.status+'</span></div>'+(s.avg!==null?'<div class="hint">Rata-rata skor misi: '+Math.round(s.avg*100)+'%</div>':'')+(s.extraTotal?'<div class="hint">Latihan penguat (bonus — tidak mengurangi persen utama): '+s.extraDone+'/'+s.extraTotal+' selesai</div>':'')+'</div>';
   }).join("");
   var sc=scoredUnits().slice().sort(function(a,b){return (b.score/b.max)-(a.score/a.max);});
   var lists="";
