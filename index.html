@@ -192,6 +192,17 @@ audio{width:100%;height:44px}
 .hidden{display:none !important}
 @media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.hero-copy h1{font-size:1.65rem}}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.progressbar i{transition:none}}
+
+.guide-overlay{position:fixed;inset:0;background:rgba(20,16,40,.55);display:flex;align-items:flex-end;justify-content:center;z-index:60;padding:0}
+.guide-card{background:var(--card,#fff);color:var(--ink,#241f3a);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:22px 20px 26px;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
+@media(min-width:640px){.guide-overlay{align-items:center;padding:20px}.guide-card{border-radius:20px}}
+.guide-card h2{margin:0 0 4px;font-size:1.3rem}
+.guide-card .g-sub{margin:0 0 14px;opacity:.8}
+.guide-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
+.guide-steps li{display:flex;gap:12px;align-items:flex-start}
+.guide-steps .g-num{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:#6d5df2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+.guide-steps p{margin:2px 0 0;line-height:1.5}
+.guide-note{font-size:.85rem;opacity:.75;margin:12px 0 0;text-align:center}
 </style>
 </head>
 <body>
@@ -214,6 +225,7 @@ audio{width:100%;height:44px}
         <span class="eyebrow">Versi GitHub Pages • Progres tersimpan di HP ini • Dari Ray, buat kamu</span>
         <h1>Belajar <span class="jp">N3</span> pelan-pelan,<br>tapi nempel beneran.</h1>
         <p class="sub">16 misi pendek, 8–10 menit per sesi. Review N5 dan fondasi N4-nya dikuatkan dulu, baru naik ke N3 — mode belajarnya ganti-ganti terus: baca kilat, flashcard, kuis, susun kalimat, listening, dan reading. Nggak ada sesi ceramah panjang. Sekarang ada juga <strong>Mode Penguat</strong> dari buku yang sedang kamu pelajari, 『JLPT N3 この一冊で合格する』（日本語の森）: 70 pola bunpō pertamamu dan kosakata hari 1–12 diulang lagi di sini — karena “sudah pernah belajar” belum tentu “masih ingat”.</p>
+        <div style="margin:14px 0 4px"><button class="btn btn-indigo" type="button" id="btnGuide">📖 Cara Main &amp; Urutan Belajar</button></div>
         <div class="notice" role="note">
           <strong>Jujur di awal ya:</strong> di versi ini <strong>progresmu tersimpan otomatis di perangkat &amp; browser ini</strong> (pakai penyimpanan lokal browser / localStorage). Kalau halaman ditutup lalu dibuka lagi di <strong>HP dan browser yang sama</strong>, XP, level, misi yang selesai, skor, dan tumpukan kartu ulangmu akan dimuat lagi — tidak mulai dari nol. Tapi perlu tahu juga: progres ini <strong>tidak terkirim ke siapa pun dan tidak tersimpan di server</strong>. Kalau kamu ganti HP, ganti browser, memakai mode privat/incognito, atau menghapus data browser, progresnya akan hilang. Versi ini juga <strong>tidak mengirim kabar “2 hari tidak dibuka” ke Ray</strong> — jadi kalau lagi malas, nggak ada yang ngawasin diam-diam. Semangatnya tetap dari kamu sendiri (dan Ray, langsung).
         </div>
@@ -567,7 +579,7 @@ function levelFromXp(xp){var lv=1,i;for(i=0;i<THRESH.length;i++){if(xp>=THRESH[i
    Tidak dikirim ke server / siapa pun. */
 var STORAGE_KEY="aplikasi-belajar-n3:progress:v1";
 var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0};
-var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true};
+var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,guideSeen:false};
 var state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
 function todayStr(){var d=new Date();var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
@@ -1053,6 +1065,13 @@ if(resetBtn){resetBtn.addEventListener("click",function(){
 saveProgress();
 renderHome();
 
+
+function openGuide(){var g=document.getElementById("guideOverlay");if(g){g.hidden=false;document.body.style.overflow="hidden";}}
+function closeGuide(){var g=document.getElementById("guideOverlay");if(g){g.hidden=true;document.body.style.overflow="";}if(!studyMeta.guideSeen){studyMeta.guideSeen=true;saveProgress();}}
+var bg=document.getElementById("btnGuide");if(bg)bg.addEventListener("click",openGuide);
+var bs=document.getElementById("btnGuideStart");if(bs)bs.addEventListener("click",closeGuide);
+if(!studyMeta.guideSeen)openGuide();
+
 document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){
   var t=b.getAttribute("data-go"),el=null;
   if(t==="kotoba")el=document.getElementById("kotobaHead");
@@ -1062,5 +1081,22 @@ document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("c
   if(el){el.scrollIntoView({behavior:"smooth",block:"start"});el.classList.add("flash-target");setTimeout(function(){el.classList.remove("flash-target");},1800);}
 });});
 </script>
+
+<div class="guide-overlay" id="guideOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="guide-card">
+    <h2 id="guideTitle">Halo! Begini cara pakainya 👋</h2>
+    <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
+    <ol class="guide-steps">
+      <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi yang harus kamu kerjakan berikutnya. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
+      <li><span class="g-num">2</span><p><strong>Urutannya dari bawah ke atas:</strong> Review N5 → Fondasi N4 → materi N3 (Bunpō, Kotoba, Dokkai, Listening). Yang di atas di tab Jalur adalah yang dikerjakan duluan.</p></li>
+      <li><span class="g-num">3</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu kerjakan kuis / flashcard / listening-nya sampai selesai. Skor dan XP tersimpan otomatis di HP ini.</p></li>
+      <li><span class="g-num">4</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
+      <li><span class="g-num">5</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihan membacanya beneran seperti ujian.</p></li>
+      <li><span class="g-num">6</span><p><strong>Jawaban yang salah masuk tumpukan “Ulang”</strong> — sesekali kerjakan di sana biar yang lemah jadi nempel. Di tab <strong>Progres</strong> kamu bisa lihat bagian mana yang sudah nempel dan mana yang perlu diulang, dan tombol <strong>Salin Ringkasan</strong> membuat laporan belajarmu untuk dibahas bareng Ray.</p></li>
+    </ol>
+    <button class="btn btn-indigo" type="button" id="btnGuideStart" style="width:100%">Siap, mulai belajar!</button>
+    <p class="guide-note">Panduan ini muncul sekali di awal. Nanti bisa dibuka lagi kapan pun lewat tombol “Cara Main &amp; Urutan Belajar” di beranda.</p>
+  </div>
+</div>
 </body>
 </html>
