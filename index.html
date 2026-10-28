@@ -255,6 +255,8 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
 .cardbox{position:relative}
 .hanamaru{position:absolute;top:12px;right:14px;width:86px;height:86px;border:3px solid var(--shu);border-radius:50%;color:var(--shu);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:.76rem;line-height:1.25;transform:rotate(-8deg);opacity:.92;pointer-events:none;padding:8px}
 .hanamaru::after{content:"";position:absolute;inset:5px;border:1.5px solid var(--shu);border-radius:50%}
+.lesson-card{position:relative}
+.card-stamp{position:absolute;top:10px;right:10px;width:44px;height:44px;background:var(--shu);color:#FFF8EA;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;transform:rotate(-7deg);opacity:.94;box-shadow:inset 0 0 0 2px rgba(255,248,234,.5),0 1px 4px rgba(199,62,46,.35);pointer-events:none;z-index:2}
 .ray-note{display:flex;gap:12px;align-items:flex-start;background:var(--note);border:1px solid var(--line);border-radius:var(--radius);padding:16px;color:#4A3F14;box-shadow:var(--shadow)}
 .ray-note h3{margin-bottom:4px;font-size:1rem}
 .ray-note p{font-size:.95rem}
@@ -390,8 +392,8 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
       <p class="sec-desc">Pengulangan dari bukumu: <strong>70 pola bunpō</strong> &amp; <strong>kosakata hari 1–12</strong> yang sudah kamu pelajari — biar nempel beneran, bukan cuma pernah lewat.</p>
       <h3 id="bunpoHead" style="margin:16px 0 10px;font-size:1.02rem">Penguat Bunpō — 70 pola pertama (Bab 2, tema 1–8)</h3>
       <div class="lesson-grid" id="boostGrammar"></div>
-      <div class="actions" style="margin-top:12px">
-        <button class="btn btn-accent" type="button" id="btnGramAll">Kuis campuran — semua 70 pola</button>
+      <div class="actions" style="margin-top:12px;position:relative">
+        <button class="btn btn-accent" type="button" id="btnGramAll">Kuis campuran — semua 70 pola</button><span id="gramAllStamp" class="card-stamp jp" style="display:none" aria-hidden="true">済</span>
       </div>
       <h3 id="kotobaHead" style="margin:22px 0 10px;font-size:1.02rem">Review Kosakata — hari 1–12 (daftar Bab 1, menurut kategori buku)</h3>
       <div class="lesson-grid" id="boostVocab"></div>
@@ -399,7 +401,7 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
         <span class="badges"><span class="badge b-n3">N3</span><span class="badge b-skill">Kuis konteks</span></span>
         <h3>Kuis Konteks Kosakata — model soal JLPT</h3>
         <div class="meta">8 soal orisinal model 文脈規定（memakai kata dalam konteks) dan 漢字読み (cara baca kanji), memakai kata-kata dari bank hari 1–12 di atas.</div>
-        <div class="boost-actions"><button class="btn btn-accent btn-small" type="button" id="btnVocabCtx">Mulai kuis konteks</button></div>
+        <span id="ctxStamp" class="card-stamp jp" style="display:none" aria-hidden="true">済</span><div class="boost-actions"><button class="btn btn-accent btn-small" type="button" id="btnVocabCtx">Mulai kuis konteks</button></div>
       </div>
     </section>
 
@@ -896,7 +898,7 @@ function renderHome(){
     var items=LESSONS.filter(function(l){return l.group===g;});
     return '<h3 style="margin:20px 0 10px;font-size:1.02rem">'+esc(g)+'</h3><div class="lesson-grid">'+items.map(function(l){
       var done=state.done[l.id];
-      return '<button class="lesson-card" type="button" data-start="'+l.id+'"><span class="badges"><span class="badge '+(l.level==="N5"?"b-n5":l.level==="N4"?"b-n4":"b-n3")+'">'+l.level+'</span><span class="badge b-skill">'+esc(l.skill)+'</span>'+(done?'<span class="badge b-done">Selesai • '+state.scores[l.id]+'/4</span>':'')+'</span><h3>'+esc(l.title)+'</h3><div class="pattern jp">'+esc(l.pattern)+'</div><div class="meta">±'+l.minutes+' menit • 3 flashcard • 4 soal</div><div class="src">'+esc(l.source)+'</div></button>';
+      return '<button class="lesson-card" type="button" data-start="'+l.id+'"><span class="badges"><span class="badge '+(l.level==="N5"?"b-n5":l.level==="N4"?"b-n4":"b-n3")+'">'+l.level+'</span><span class="badge b-skill">'+esc(l.skill)+'</span>'+(done?'<span class="badge b-done">Selesai • '+state.scores[l.id]+'/4</span>':'')+'</span>'+(done?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(l.title)+'</h3><div class="pattern jp">'+esc(l.pattern)+'</div><div class="meta">±'+l.minutes+' menit • 3 flashcard • 4 soal</div><div class="src">'+esc(l.source)+'</div></button>';
     }).join("")+'</div>';
   }).join("");
   // review
@@ -911,27 +913,23 @@ function renderHome(){
 }
 
 var lvHist=false;
-var catHist=false,lvReturn="home",homeScrollY=0;
+var catHist=false,lvReturn="home",homeScrollY=0,catKey=null;
 var CAT_META={kotoba:{t:"\u{1F331} Kotoba — Kosakata",s:"Kosakata & kanji"},bunpo:{t:"\u{1F9E9} Bunp\u014D — Tata Bahasa",s:"Pola-pola kalimat"},dokkai:{t:"\u{1F4D6} Dokkai — Reading",s:"Baca teksnya, jawab soalnya"},choukai:{t:"\u{1F3A7} Ch\u014Dkai — Listening",s:"Dengarkan, lalu jawab"}};
 function skillKeyOf(l){return l.skill==="Grammar"?"bunpo":(l.skill==="Kosakata"||l.skill==="Kanji")?"kotoba":l.skill==="Listening"?"choukai":"dokkai";}
+function renderCatBody(){if(!catKey)return;var items=LESSONS.filter(function(l){return skillKeyOf(l)===catKey;});el("catBody").innerHTML='<div class="lesson-grid">'+items.map(function(l){var done=state.done[l.id];return '<button class="lesson-card" type="button" data-start="'+l.id+'"><span class="badges"><span class="badge '+(l.level==="N5"?"b-n5":l.level==="N4"?"b-n4":"b-n3")+'">'+l.level+'</span><span class="badge b-skill">'+esc(l.skill)+'</span>'+(done?'<span class="badge b-done">Selesai \u2022 '+state.scores[l.id]+'/4</span>':'')+'</span>'+(done?'<span class="card-stamp jp" aria-hidden="true">\u6e08</span>':'')+'<h3>'+esc(l.title)+'</h3><div class="pattern jp">'+esc(l.pattern)+'</div><div class="meta">\u00b1'+l.minutes+' menit \u2022 3 flashcard \u2022 4 soal</div><div class="src">'+esc(l.source)+'</div></button>';}).join("")+"</div>";var btns=el("catBody").querySelectorAll("[data-start]");for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(){startLesson(this.getAttribute("data-start"));});}}
 function openCatView(key){
-  var meta=CAT_META[key];if(!meta)return;
+  var meta=CAT_META[key];if(!meta)return;catKey=key;
   var items=LESSONS.filter(function(l){return skillKeyOf(l)===key;});
   el("catTitle").textContent=meta.t;
   el("catSub").textContent=meta.s+" \u2022 "+items.length+" misi";
-  el("catBody").innerHTML='<div class="lesson-grid">'+items.map(function(l){
-    var done=state.done[l.id];
-    return '<button class="lesson-card" type="button" data-start="'+l.id+'"><span class="badges"><span class="badge '+(l.level==="N5"?"b-n5":l.level==="N4"?"b-n4":"b-n3")+'">'+l.level+'</span><span class="badge b-skill">'+esc(l.skill)+'</span>'+(done?'<span class="badge b-done">Selesai \u2022 '+state.scores[l.id]+'/4</span>':'')+'</span><h3>'+esc(l.title)+'</h3><div class="pattern jp">'+esc(l.pattern)+'</div><div class="meta">\u00B1'+l.minutes+' menit \u2022 3 flashcard \u2022 4 soal</div><div class="src">'+esc(l.source)+'</div></button>';
-  }).join("")+"</div>";
-  var btns=el("catBody").querySelectorAll("[data-start]");
-  for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(){startLesson(this.getAttribute("data-start"));});}
+  renderCatBody();
   homeScrollY=window.scrollY||0;
   el("homeView").classList.add("hidden");el("catView").classList.add("open");window.scrollTo(0,0);
   if(!catHist){try{history.pushState({n3cat:1},"");catHist=true;}catch(e){}}
 }
-function closeCatView(){if(catHist){catHist=false;try{history.back();return;}catch(e){}}el("catView").classList.remove("open");el("homeView").classList.remove("hidden");window.scrollTo(0,homeScrollY||0);}
+function closeCatView(){if(catHist){catHist=false;try{history.back();return;}catch(e){}}el("catView").classList.remove("open");el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}
 function openLessonView(){if(!el("homeView").classList.contains("hidden")){homeScrollY=window.scrollY||0;}lvReturn=el("catView").classList.contains("open")?"cat":"home";el("catView").classList.remove("open");el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
-function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
+function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){renderCatBody();el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
 if(window.addEventListener){window.addEventListener("popstate",function(){if(el("lessonView").classList.contains("open")){lvHist=false;closeLessonView();}else if(el("catView").classList.contains("open")){catHist=false;closeCatView();}});}
 function stopAudio(){var a=document.querySelectorAll("audio");for(var i=0;i<a.length;i++){try{a[i].pause();}catch(e){}}}
 function setProgress(){
@@ -1242,19 +1240,19 @@ function renderBoost(){
   var gEl=el("boostGrammar"),vEl=el("boostVocab");if(!gEl||!vEl)return;
   gEl.innerHTML=GRAM_THEMES.map(function(t,i){
     var doneD=state.done["gd-"+i],doneQ=state.done["gq-"+i];
-    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span><h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Flashcard pola + arti + contoh, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
+    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">Bunpō '+(t.items.length)+' pola</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneD&&doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(t.name)+'</h3><div class="pattern jp">'+t.items.map(function(it){return esc(it.p);}).join(" ・ ")+'</div><div class="meta">Flashcard pola + arti + contoh, kuis pilihan, dan susun kalimat.</div><div class="src">Sumber pola &amp; urutan: 『この一冊で合格する』'+esc(t.pages)+' • Contoh &amp; soal orisinal</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-gdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-gquiz="'+i+'">Kuis tema ini</button></div></div>';
   }).join("");
   vEl.innerHTML=VOCAB_CATS.map(function(c,i){
     var doneD=state.done["vd-"+i],doneQ=state.done["vq-"+i];
-    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span><h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti, plus kuis 漢字読み・arti ala soal JLPT.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-vquiz="'+i+'">Kuis kategori ini</button></div></div>';
-  }).join("")+'<div class="boost-card"><span class="badges"><span class="badge b-skill">Campuran</span></span><h3>Semua kategori sekaligus</h3><div class="meta">Kuis acak dari seluruh bank kosakata hari 1–12.</div><div class="boost-actions"><button class="btn btn-accent btn-small" type="button" data-vquiz="-1">Kuis campuran kosakata</button></div></div>';
+    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+(doneQ?'<span class="badge b-done">Kuis selesai</span>':'')+'</span>'+(doneD&&doneQ?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti, plus kuis 漢字読み・arti ala soal JLPT.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button><button class="btn btn-accent btn-small" type="button" data-vquiz="'+i+'">Kuis kategori ini</button></div></div>';
+  }).join("")+'<div class="boost-card"><span class="badges"><span class="badge b-skill">Campuran</span></span>'+(state.done["vq-all"]?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>Semua kategori sekaligus</h3><div class="meta">Kuis acak dari seluruh bank kosakata hari 1–12.</div><div class="boost-actions"><button class="btn btn-accent btn-small" type="button" data-vquiz="-1">Kuis campuran kosakata</button></div></div>';
   var map=[["data-gdeck",function(i){var t=GRAM_THEMES[i];startDeck("Flashcard Bunpō — "+t.name,gramCards(t),"gd-"+i);}],
            ["data-gquiz",function(i){gramQuiz(i);}],
            ["data-vdeck",function(i){var c=VOCAB_CATS[i];startDeck("Flashcard Kosakata — "+c.name,vocabCards(c),"vd-"+i);}],
            ["data-vquiz",function(i){vocabQuiz(i);}]];
   map.forEach(function(pair){var bs=document.querySelectorAll("["+pair[0]+"]");for(var j=0;j<bs.length;j++){bs[j].addEventListener("click",function(){pair[1](parseInt(this.getAttribute(pair[0]),10));});}});
-  var allBtn=el("btnGramAll");if(allBtn)allBtn.addEventListener("click",function(){gramQuiz(-1);});
-  var ctxBtn=el("btnVocabCtx");if(ctxBtn)ctxBtn.addEventListener("click",startCtxLesson);
+  var allBtn=el("btnGramAll");if(allBtn)allBtn.addEventListener("click",function(){gramQuiz(-1);});var gStamp=el("gramAllStamp");if(gStamp)gStamp.style.display=state.done["gq-all"]?"flex":"none";
+  var ctxBtn=el("btnVocabCtx");if(ctxBtn)ctxBtn.addEventListener("click",startCtxLesson);var cStamp=el("ctxStamp");if(cStamp)cStamp.style.display=(typeof VOCAB_CTX_LESSON!=="undefined"&&state.done[VOCAB_CTX_LESSON.id])?"flex":"none";
 }
 
 var furiBtns=document.querySelectorAll(".btnFuri");
