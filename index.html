@@ -226,7 +226,7 @@ audio{width:100%;height:44px}
       <div class="hero-copy">
         <span class="eyebrow">Versi GitHub Pages • Progres tersimpan di HP ini • Dari Ray, buat kamu</span>
         <h1>Belajar <span class="jp">N3</span> pelan-pelan,<br>tapi nempel beneran.</h1>
-        <p class="sub">16 misi pendek, 8–10 menit per sesi. Review N5 dan fondasi N4-nya dikuatkan dulu, baru naik ke N3 — mode belajarnya ganti-ganti terus: baca kilat, flashcard, kuis, susun kalimat, listening, dan reading. Nggak ada sesi ceramah panjang. Sekarang ada juga <strong>Mode Penguat</strong> dari buku yang sedang kamu pelajari, 『JLPT N3 この一冊で合格する』（日本語の森）: 70 pola bunpō pertamamu dan kosakata hari 1–12 diulang lagi di sini — karena “sudah pernah belajar” belum tentu “masih ingat”.</p>
+        <p class="sub">20 misi pendek, 8–10 menit per sesi. Review N5 dan fondasi N4-nya dikuatkan dulu, baru naik ke N3 — mode belajarnya ganti-ganti terus: baca kilat, flashcard, kuis, susun kalimat, listening, dan reading. Nggak ada sesi ceramah panjang. Sekarang ada juga <strong>Mode Penguat</strong> dari buku yang sedang kamu pelajari, 『JLPT N3 この一冊で合格する』（日本語の森）: 70 pola bunpō pertamamu dan kosakata hari 1–12 diulang lagi di sini — karena “sudah pernah belajar” belum tentu “masih ingat”.</p>
         <div style="margin:14px 0 4px"><button class="btn btn-indigo" type="button" id="btnGuide">📖 Cara Main &amp; Urutan Belajar</button></div>
         <div class="notice" role="note">
           <strong>Jujur di awal ya:</strong> di versi ini <strong>progresmu tersimpan otomatis di perangkat &amp; browser ini</strong> (pakai penyimpanan lokal browser / localStorage). Kalau halaman ditutup lalu dibuka lagi di <strong>HP dan browser yang sama</strong>, XP, level, misi yang selesai, skor, dan tumpukan kartu ulangmu akan dimuat lagi — tidak mulai dari nol. Tapi perlu tahu juga: progres ini <strong>tidak terkirim ke siapa pun dan tidak tersimpan di server</strong>. Kalau kamu ganti HP, ganti browser, memakai mode privat/incognito, atau menghapus data browser, progresnya akan hilang. Versi ini juga <strong>tidak mengirim kabar “2 hari tidak dibuka” ke Ray</strong> — jadi kalau lagi malas, nggak ada yang ngawasin diam-diam. Semangatnya tetap dari kamu sendiri (dan Ray, langsung).
@@ -1111,7 +1111,7 @@ if(!studyMeta.guideSeen)openGuide();
 document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){
   var t=b.getAttribute("data-go"),el=null;
   if(t==="kotoba")el=document.getElementById("kotobaHead");
-  else if(t==="bunpo")el=document.getElementById("bunpoHead");
+  else if(t==="bunpo"){var hs2=document.querySelectorAll("#lessonGroups h3");for(var j=0;j<hs2.length;j++){if(hs2[j].textContent.indexOf("Grammar")>-1){el=hs2[j];break;}}if(!el)el=document.getElementById("bunpoHead");}
   else{var hs=document.querySelectorAll("#lessonGroups h3");for(var i=0;i<hs.length;i++){if(t==="dokkai"&&hs[i].textContent.indexOf("Dokkai")>-1){el=hs[i];break;}if(t==="choukai"&&hs[i].textContent.indexOf("Listening")>-1){el=hs[i];break;}}}
   if(!el)el=document.getElementById("pathTitle");
   if(el){el.scrollIntoView({behavior:"smooth",block:"start"});el.classList.add("flash-target");setTimeout(function(){el.classList.remove("flash-target");},1800);}
