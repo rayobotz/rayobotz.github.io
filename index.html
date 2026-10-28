@@ -196,15 +196,23 @@ audio{width:100%;height:44px}
 
 .guide-overlay[hidden]{display:none!important}
 .guide-overlay{position:fixed;inset:0;background:rgba(20,16,40,.55);display:flex;align-items:flex-end;justify-content:center;z-index:60;padding:0}
-.guide-card{background:var(--card,#fff);color:var(--ink,#241f3a);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:22px 20px 26px;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
+.guide-card{background:var(--card,#fff);color:var(--ink,#241f3a);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);overflow:hidden}
 @media(min-width:640px){.guide-overlay{align-items:center;padding:20px}.guide-card{border-radius:20px}}
+.guide-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding:22px 20px 10px}
+.guide-foot{padding:12px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid rgba(0,0,0,.08);display:grid;gap:8px;background:var(--card,#fff)}
+.guide-foot[hidden]{display:none!important}
+.guide-step[hidden]{display:none!important}
 .guide-card h2{margin:0 0 4px;font-size:1.3rem}
 .guide-card .g-sub{margin:0 0 14px;opacity:.8}
 .guide-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
 .guide-steps li{display:flex;gap:12px;align-items:flex-start}
 .guide-steps .g-num{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:#6d5df2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
 .guide-steps p{margin:2px 0 0;line-height:1.5}
-.guide-note{font-size:.85rem;opacity:.75;margin:12px 0 0;text-align:center}
+.guide-note{font-size:.85rem;opacity:.75;margin:12px 0 4px;text-align:center}
+.guide-intro{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:12px}
+.guide-intro li{display:flex;gap:12px;align-items:flex-start}
+.guide-intro .g-ico{flex:0 0 28px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.guide-intro p{margin:2px 0 0;line-height:1.5}
 </style>
 </head>
 <body>
@@ -365,18 +373,39 @@ audio{width:100%;height:44px}
 
 <div class="guide-overlay" id="guideOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
   <div class="guide-card">
-    <h2 id="guideTitle">Halo! Begini cara pakainya 👋</h2>
-    <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
-    <ol class="guide-steps">
-      <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi yang harus kamu kerjakan berikutnya. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
-      <li><span class="g-num">2</span><p><strong>Urutannya dari bawah ke atas:</strong> Review N5 → Fondasi N4 → materi N3 (Bunpō, Kotoba, Dokkai, Listening). Yang di atas di tab Jalur adalah yang dikerjakan duluan.</p></li>
-      <li><span class="g-num">3</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu kerjakan kuis / flashcard / listening-nya sampai selesai. Skor dan XP tersimpan otomatis di HP ini.</p></li>
-      <li><span class="g-num">4</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
-      <li><span class="g-num">5</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihan membacanya beneran seperti ujian.</p></li>
-      <li><span class="g-num">6</span><p><strong>Jawaban yang salah masuk tumpukan “Ulang”</strong> — sesekali kerjakan di sana biar yang lemah jadi nempel. Di tab <strong>Progres</strong> kamu bisa lihat bagian mana yang sudah nempel dan mana yang perlu diulang, dan tombol <strong>Salin Ringkasan</strong> membuat laporan belajarmu untuk dibahas bareng Ray.</p></li>
-    </ol>
-    <button class="btn btn-indigo" type="button" id="btnGuideStart" style="width:100%">Siap, mulai belajar!</button>
-    <p class="guide-note">Panduan ini muncul sekali di awal. Nanti bisa dibuka lagi kapan pun lewat tombol “Cara Main &amp; Urutan Belajar” di beranda.</p>
+    <div class="guide-scroll" id="guideScroll">
+      <div class="guide-step" id="guideStep1">
+        <h2 id="guideTitle">Selamat datang! 👋</h2>
+        <p class="g-sub">Kenalan dulu sama aplikasi belajarmu, ya.</p>
+        <ul class="guide-intro">
+          <li><span class="g-ico">📚</span><p>Aplikasi ini dibuat khusus buat menemanimu lulus <strong>JLPT N3</strong>, mengikuti buku yang sedang kamu pelajari: 『JLPT N3 この一冊で合格する』（日本語の森）.</p></li>
+          <li><span class="g-ico">⏱️</span><p>Isinya <strong>misi pendek 8–10 menit</strong>: Bunpō （文法）, Kotoba （語彙）, Dokkai （読解）, dan Listening （聴解）. Sedikit-sedikit, yang penting rutin.</p></li>
+          <li><span class="g-ico">💪</span><p>Ada <strong>Mode Penguat</strong>: 70 pola bunpō dan kosakata hari 1–12 dari bukumu diulang lagi di sini, sampai nempel beneran.</p></li>
+          <li><span class="g-ico">💾</span><p>Progresmu <strong>tersimpan otomatis di HP ini</strong> — tutup lalu buka lagi, lanjut dari tempat terakhir. (Catatan kecil: harus di HP dan browser yang sama, ya.)</p></li>
+        </ul>
+        <p class="guide-note">Aplikasi ini dibuat oleh Ray buat menemani belajarmu. Semangat — kamu nggak jalan sendiri. 💛</p>
+      </div>
+      <div class="guide-step" id="guideStep2" hidden>
+        <h2>Cara pakainya gampang</h2>
+        <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
+        <ol class="guide-steps">
+          <li><span class="g-num">1</span><p><strong>Tekan “Misi Hari Ini”.</strong> Tombol di beranda otomatis menunjuk misi berikutnya buatmu. Urutannya: Review N5 → Fondasi N4 → materi N3. Ikuti saja dia, nggak perlu milih-milih dulu.</p></li>
+          <li><span class="g-num">2</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu jawab kuis / flashcard / listening-nya sampai selesai. Tebak dulu, baru lihat benar-salahnya — di situlah materinya nempel. Skor dan XP tersimpan otomatis di HP ini.</p></li>
+          <li><span class="g-num">3</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
+          <li><span class="g-num">4</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihannya beneran seperti ujian.</p></li>
+          <li><span class="g-num">5</span><p><strong>Jawaban yang salah masuk tumpukan “Ulang”</strong> — sesekali kerjakan di sana biar yang lemah jadi nempel. Di tab <strong>Progres</strong> kamu bisa lihat bagian mana yang sudah nempel dan mana yang perlu diulang, dan tombol <strong>Salin Ringkasan</strong> membuat laporan belajarmu buat dibahas bareng Ray.</p></li>
+        </ol>
+        <p class="guide-note">Pengenalan ini muncul sekali di awal. Nanti bisa dibuka lagi kapan pun lewat tombol “Cara Main &amp; Urutan Belajar” di beranda.</p>
+      </div>
+    </div>
+    <div class="guide-foot" id="guideFoot1">
+      <button class="btn btn-indigo" type="button" id="btnIntroNext" style="width:100%">Lanjut — cara pakainya →</button>
+      <button class="btn btn-ghost" type="button" id="btnIntroSkip" style="width:100%">Lewati, langsung belajar</button>
+    </div>
+    <div class="guide-foot" id="guideFoot2" hidden>
+      <button class="btn btn-indigo" type="button" id="btnGuideStart" style="width:100%">Siap, mulai belajar!</button>
+      <button class="btn btn-ghost" type="button" id="btnGuideBack" style="width:100%">← Kembali ke pengenalan</button>
+    </div>
   </div>
 </div>
 <script>
@@ -612,7 +641,7 @@ function levelFromXp(xp){var lv=1,i;for(i=0;i<THRESH.length;i++){if(xp>=THRESH[i
    Tidak dikirim ke server / siapa pun. */
 var STORAGE_KEY="aplikasi-belajar-n3:progress:v1";
 var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{}};
-var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,guideSeen:false};
+var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,guideSeen:false,introSeen:false};
 var state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
 function todayStr(){var d=new Date();var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
@@ -1158,11 +1187,21 @@ saveProgress();
 renderHome();
 
 
-function openGuide(){var g=document.getElementById("guideOverlay");if(g){g.hidden=false;document.body.style.overflow="hidden";}}
-function closeGuide(){var g=document.getElementById("guideOverlay");if(g){g.hidden=true;document.body.style.overflow="";}if(!studyMeta.guideSeen){studyMeta.guideSeen=true;saveProgress();}}
+function showGuideStep(n){
+  var s1=document.getElementById("guideStep1"),s2=document.getElementById("guideStep2");
+  var f1=document.getElementById("guideFoot1"),f2=document.getElementById("guideFoot2");
+  if(s1)s1.hidden=n!==1; if(s2)s2.hidden=n!==2;
+  if(f1)f1.hidden=n!==1; if(f2)f2.hidden=n!==2;
+  var sc=document.getElementById("guideScroll"); if(sc)sc.scrollTop=0;
+}
+function openGuide(){var g=document.getElementById("guideOverlay");if(g){showGuideStep(1);g.hidden=false;document.body.style.overflow="hidden";}}
+function closeGuide(){var g=document.getElementById("guideOverlay");if(g){g.hidden=true;document.body.style.overflow="";}if(!studyMeta.introSeen||!studyMeta.guideSeen){studyMeta.introSeen=true;studyMeta.guideSeen=true;saveProgress();}}
 var bg=document.getElementById("btnGuide");if(bg)bg.addEventListener("click",openGuide);
+var bn=document.getElementById("btnIntroNext");if(bn)bn.addEventListener("click",function(){showGuideStep(2);});
+var bk=document.getElementById("btnGuideBack");if(bk)bk.addEventListener("click",function(){showGuideStep(1);});
+var bsk=document.getElementById("btnIntroSkip");if(bsk)bsk.addEventListener("click",closeGuide);
 var bs=document.getElementById("btnGuideStart");if(bs)bs.addEventListener("click",closeGuide);
-if(!studyMeta.guideSeen)openGuide();
+if(!studyMeta.introSeen)openGuide();
 
 document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){
   var t=b.getAttribute("data-go"),el=null;
