@@ -1007,7 +1007,7 @@ function summaryText(){
   if(sc.length){
     lines.push("","Paling nempel:");
     sc.slice(0,3).forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});
-    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<1;}).slice(0,3);
+    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<0.75;}).slice(0,3);
     if(weak.length){lines.push("","Masih perlu diulang:");weak.forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});}
   } else { lines.push("","Belum ada misi berskor yang selesai \u2014 baru mulai."); }
   lines.push("","Kartu di tumpukan ulang: "+state.review.length+" kartu");
@@ -1023,7 +1023,7 @@ function renderProgres(){
   var lists="";
   if(sc.length){
     var strong=sc.slice(0,3).map(function(u){return "<li>"+esc(u.title)+" ("+u.score+"/"+u.max+")</li>";}).join("");
-    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<1;}).slice(0,3).map(function(u){return "<li>"+esc(u.title)+" ("+u.score+"/"+u.max+")</li>";}).join("");
+    var weak=sc.slice().sort(function(a,b){return (a.score/a.max)-(b.score/b.max);}).filter(function(u){return u.score/u.max<0.75;}).slice(0,3).map(function(u){return "<li>"+esc(u.title)+" ("+u.score+"/"+u.max+")</li>";}).join("");
     lists='<div class="prog-card" style="margin-top:10px"><h3>Paling nempel</h3><ul class="prog-list">'+strong+"</ul>"+(weak?'<h3 style="margin-top:10px">Masih perlu diulang</h3><ul class="prog-list">'+weak+"</ul>":"")+'<p class="hint" style="margin-top:8px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
   } else {
     lists='<div class="prog-card" style="margin-top:10px"><p>Belum ada misi berskor yang selesai. Kerjakan satu misi dulu \u2014 bagian terkuat dan yang perlu diulang akan muncul di sini.</p><p class="hint" style="margin-top:6px">Kartu di tumpukan ulang: '+state.review.length+" kartu</p></div>";
