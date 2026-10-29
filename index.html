@@ -1209,25 +1209,46 @@ var VOCAB_CTX_LESSON={id:"vocab-ctx",level:"N3",skill:"Kosakata",group:"Mode Pen
 
 /* ===== Boost engines: decks + generated quizzes ===== */
 var deckState=null;
+var DECK_BATCH=10;
 function gramCards(t){return t.items.map(function(it){return{front:it.p,reading:it.m,meaning:"Contoh: "+it.ex+" — "+it.exId,note:it.note||""};});}
 function vocabCards(c){return c.words.map(function(w){return{front:w.w,reading:w.r,meaning:w.m};});}
 function startDeck(title,cards,doneId){
-  deckState={title:title,cards:cards,idx:0,doneId:doneId,known:0,attempt:beginAttempt(doneId)};saveProgress();
+  if(!state.deckProg)state.deckProg={};
+  if(!state.deckPaid)state.deckPaid={};
+  var prog=state.deckProg[doneId];
+  var resume=(prog&&!state.done[doneId]&&prog.idx>0&&prog.idx<cards.length);
+  deckState={title:title,cards:cards,idx:resume?prog.idx:0,batchStart:resume?prog.idx:0,doneId:doneId,known:resume?(prog.known||0):0,paid:Math.max(resume?(prog.paid||0):0,state.deckPaid[doneId]||0),attempt:beginAttempt(doneId)};saveProgress();
   reviewMode=false;current={id:doneId,title:title,questions:[],cards:cards};
   fcFlipped=false;openLessonView();renderDeckCard();
 }
 function renderDeckCard(){
   var d=deckState,c=d.cards[d.idx];
-  el("lvTitle").textContent=d.title;el("lvStepText").textContent="Kartu "+(d.idx+1)+"/"+d.cards.length;
+  el("lvTitle").textContent=d.title;el("lvStepText").textContent="Mini "+(Math.floor(d.batchStart/DECK_BATCH)+1)+"/"+Math.ceil(d.cards.length/DECK_BATCH)+" • Kartu "+(d.idx-d.batchStart+1)+"/"+Math.min(DECK_BATCH,d.cards.length-d.batchStart);
   el("lvBar").style.width=Math.round((d.idx)/d.cards.length*100)+"%";
-  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Flashcard penguat • '+(d.idx+1)+'/'+d.cards.length+'</span><h2>Tebak dulu di kepala, baru balik kartunya</h2><button class="flashcard" id="fcCard" type="button" aria-label="Flashcard, ketuk untuk membalik"><div class="front jp">'+esc(c.front)+'</div>'+(fcFlipped?'<div class="reading">'+esc(c.reading)+'</div><div class="meaning">'+esc(c.meaning)+'</div>'+(c.note?'<div class="fc-note">💡 <strong>Penjelasan:</strong> '+esc(c.note)+'</div>':''):'<div class="tap">Ketuk kartu buat lihat arti &amp; contohnya</div>')+'</button><div class="fc-nav"><button class="btn btn-ghost" id="btnDNo" type="button">Belum hafal — masuk tumpukan ulang</button><button class="btn btn-accent" id="btnDYes" type="button">Sudah hafal</button></div></div>';
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Flashcard penguat • Mini deck '+(Math.floor(d.batchStart/DECK_BATCH)+1)+' dari '+Math.ceil(d.cards.length/DECK_BATCH)+' (total '+d.cards.length+' kartu)</span><h2>Tebak dulu di kepala, baru balik kartunya</h2><button class="flashcard" id="fcCard" type="button" aria-label="Flashcard, ketuk untuk membalik"><div class="front jp">'+esc(c.front)+'</div>'+(fcFlipped?'<div class="reading">'+esc(c.reading)+'</div><div class="meaning">'+esc(c.meaning)+'</div>'+(c.note?'<div class="fc-note">💡 <strong>Penjelasan:</strong> '+esc(c.note)+'</div>':''):'<div class="tap">Ketuk kartu buat lihat arti &amp; contohnya</div>')+'</button><div class="fc-nav"><button class="btn btn-ghost" id="btnDNo" type="button">Belum hafal — masuk tumpukan ulang</button><button class="btn btn-accent" id="btnDYes" type="button">Sudah hafal</button></div></div>';
   el("fcCard").addEventListener("click",function(){fcFlipped=!fcFlipped;renderDeckCard();});
-  el("btnDYes").addEventListener("click",function(){removeReview(c.front);d.known++;if(d.attempt<=1){state.xp+=2;}markStudyToday();saveProgress();nextDeck();});
+  el("btnDYes").addEventListener("click",function(){removeReview(c.front);d.known++;if(d.known>d.paid){state.xp+=2;d.paid++;}markStudyToday();saveProgress();nextDeck();});
   el("btnDNo").addEventListener("click",function(){addReview(c);nextDeck();});
+}
+function renderBatchDone(){
+  var d=deckState;
+  var batchNo=Math.floor(d.batchStart/DECK_BATCH)+1,batchTotal=Math.ceil(d.cards.length/DECK_BATCH),doneCount=d.idx+1;
+  el("lvBar").style.width=Math.round(doneCount/d.cards.length*100)+"%";el("lvStepText").textContent="Mini deck "+batchNo+"/"+batchTotal+" selesai";
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Mini deck selesai 🎉</span><div class="result-score">'+doneCount+'/'+d.cards.length+' kartu</div><p class="result-sub">Sepuluh kartu beres — pelan-pelan saja, yang penting nempel beneran. Progres deck ini sudah tersimpan; berhenti sekarang pun, nanti tinggal lanjut dari kartu ke-'+(doneCount+1)+'.</p><p class="result-sub">Sudah hafal sejauh ini: '+d.known+' kartu • Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p><div class="actions"><button class="btn btn-ghost" id="btnBatchStop" type="button">Berhenti di sini</button><button class="btn btn-accent" id="btnBatchNext" type="button">Lanjut mini deck berikutnya →</button></div></div>';
+  el("btnBatchNext").addEventListener("click",function(){var d2=deckState;d2.batchStart=d2.idx+1;d2.idx++;fcFlipped=false;renderDeckCard();});
+  el("btnBatchStop").addEventListener("click",closeLessonView);
 }
 function nextDeck(){
   var d=deckState;fcFlipped=false;
-  if(d.idx<d.cards.length-1){d.idx++;renderDeckCard();return;}
+  if(!state.deckProg)state.deckProg={};
+  state.deckProg[d.doneId]={idx:d.idx+1,known:d.known,paid:d.paid};
+  if(d.idx<d.cards.length-1){
+    if(d.idx+1>=d.batchStart+DECK_BATCH){saveProgress();renderBatchDone();return;}
+    d.idx++;saveProgress();renderDeckCard();return;
+  }
+  if(!state.deckPaid)state.deckPaid={};
+  state.deckPaid[d.doneId]=Math.max(state.deckPaid[d.doneId]||0,d.paid);
+  delete state.deckProg[d.doneId];
   var firstTime=!state.done[d.doneId];
   var prevKnown=state.scores[d.doneId]||0,deckBonus=0;
   if(firstTime){state.done[d.doneId]=true;state.xp+=20;markStudyToday();}
@@ -1235,7 +1256,7 @@ function nextDeck(){
   if(d.known>prevKnown)state.scores[d.doneId]=d.known;
   saveProgress();
   el("lvBar").style.width="100%";el("lvStepText").textContent="Selesai";
-  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Deck selesai</span><div class="result-score">'+d.known+'/'+d.cards.length+'</div><p class="result-sub">Kartu yang sudah hafal di deck ini.'+(firstTime?' +20 XP bonus menyelesaikan deck.':deckBonus?' +10 XP bonus karena jumlah hafalmu naik dari sebelumnya.':'')+(d.attempt>1?' Pengulangan deck: XP per kartu hanya dihitung di percobaan pertama, supaya level naiknya jujur.':'')+' Yang belum hafal ('+(d.cards.length-d.known)+' kartu) sudah masuk tumpukan ulang tersimpan di halaman utama.</p><p class="result-sub">Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p><div class="actions"><button class="btn btn-ghost" id="btnDeckAgain" type="button">Ulangi deck</button><button class="btn btn-accent" id="btnDeckHome" type="button">Kembali</button></div></div>';
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Deck selesai</span><div class="result-score">'+d.known+'/'+d.cards.length+'</div><p class="result-sub">Kartu yang sudah hafal di deck ini.'+(firstTime?' +20 XP bonus menyelesaikan deck.':deckBonus?' +10 XP bonus karena jumlah hafalmu naik dari sebelumnya.':'')+(d.attempt>1?' XP per kartu hanya dihitung sekali, supaya level naiknya jujur.':'')+' Yang belum hafal ('+(d.cards.length-d.known)+' kartu) sudah masuk tumpukan ulang tersimpan di halaman utama.</p><p class="result-sub">Total tersimpan: '+state.xp+' XP • Level '+levelFromXp(state.xp).level+'</p><div class="actions"><button class="btn btn-ghost" id="btnDeckAgain" type="button">Ulangi deck</button><button class="btn btn-accent" id="btnDeckHome" type="button">Kembali</button></div></div>';
   el("btnDeckAgain").addEventListener("click",function(){startDeck(d.title,d.cards,d.doneId);});
   el("btnDeckHome").addEventListener("click",closeLessonView);
 }
@@ -1286,7 +1307,7 @@ function gramThemeCardHtml(t,i){
 }
 function vocabCatCardHtml(c,i){
   var doneD=state.done["vd-"+i];
-  return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard. Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
+  return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard, per mini deck 10 kartu (bisa berhenti & lanjut kapan saja). Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
 }
 function wireBoostButtons(scope){
   var map=[["data-gexplain",function(i){openGramExplain(i);}],
@@ -1303,7 +1324,7 @@ function renderBoost(){
   }).join("");
   vEl.innerHTML=VOCAB_CATS.map(function(c,i){
     var doneD=state.done["vd-"+i];
-    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard. Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
+    return '<div class="boost-card"><span class="badges"><span class="badge b-n3">'+c.words.length+' kata</span>'+(doneD?'<span class="badge b-done">Flashcard selesai</span>':'')+'</span>'+(doneD?'<span class="card-stamp jp" aria-hidden="true">済</span>':'')+'<h3>'+esc(c.name)+'</h3><div class="meta">Flashcard kata + cara baca + arti — kosakata dimatengin lewat flashcard, per mini deck 10 kartu (bisa berhenti & lanjut kapan saja). Kuis di Mode Penguat khusus bunpō.</div><div class="src">Daftar kata: 『この一冊で合格する』'+esc(c.pages)+' • Arti ditulis untuk aplikasi ini</div><div class="boost-actions"><button class="btn btn-ghost btn-small" type="button" data-vdeck="'+i+'">Flashcard</button></div></div>';
   }).join("");
   var map=[["data-gexplain",function(i){openGramExplain(i);}],
            ["data-gquiz",function(i){gramQuiz(i);}],
