@@ -336,7 +336,7 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
           <li><strong>Yang salah diulang</strong> — jawaban yang salah otomatis masuk tumpukan <strong>Ulang</strong> dan muncul lagi nanti, sampai kamu bisa.</li>
           <li><strong>Cek progres</strong> — di tab Progres kelihatan bagian mana yang sudah nempel dan mana yang perlu diulang.</li>
         </ol>
-        <p>Satu misi cuma 8–10 menit. Lebih baik sedikit tapi rutin, daripada banyak dalam sekali duduk. Kalau bingung mulai dari mana, ikuti saja <strong>Misi Hari Ini — 3 Langkah</strong> di bawah: ulang, perbaiki, lanjut. Dia yang menunjuk urutan berikutnya untukmu.</p>
+        <p>Satu misi cuma 8–10 menit. Lebih baik sedikit tapi rutin, daripada banyak dalam sekali duduk. Kalau bingung mulai dari mana, langsung saja ke <strong>Mode Penguat</strong> di bawah — isinya materi dari bukumu yang sedang kamu pelajari bersama senseimu, tinggal dimatengin di sini.</p>
       </div>
     </section>
 
@@ -347,15 +347,6 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
       </div>
     </section>
 
-    <section aria-labelledby="missionTitle">
-      <div class="mission tape tape-sky">
-        <h3 id="missionTitle">Misi Hari Ini — 3 Langkah</h3>
-        <p>Ikuti urutannya dari atas: ulang yang menunggu, perbaiki yang pernah keliru, baru lanjut materi. Selesai tiga-tiganya, hari ini sudah menang. Sisanya bonus.</p>
-        <div id="step1box"></div>
-        <div id="step2box"></div>
-        <div class="mission-list" id="missionList"></div>
-      </div>
-    </section>
 
     <section aria-label="Jalan pintas Mode Penguat">
       <div class="boost-jump tape tape-kinako">
@@ -510,7 +501,7 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
         <h2>Cara pakainya gampang</h2>
         <p class="g-sub">Nggak perlu bingung mulai dari mana — ikuti saja urutan ini:</p>
         <ol class="guide-steps">
-          <li><span class="g-num">1</span><p><strong>Ikuti “Misi Hari Ini — 3 Langkah” di beranda.</strong> Urutannya selalu sama: <strong>1</strong> ulang kartu yang menunggu di tumpukan, <strong>2</strong> perbaiki pelajaran yang skornya belum sempurna, <strong>3</strong> lanjut materi baru (jalurnya: Review N5 → Fondasi N4 → materi N3). Di atasnya ada hitung mundur ke ujian 6 Desember 2026 plus ritme harianmu — jadi kamu selalu tahu hari ini cukup ngapain. Nggak perlu milih-milih dulu.</p></li>
+          <li><span class="g-num">1</span><p><strong>Mulai dari Mode Penguat di beranda.</strong> Isinya materi dari bukumu 『JLPT N3 この一冊で合格する』 yang sedang kamu pelajari bersama senseimu: bunpō lewat <strong>Penjelasan</strong> lalu <strong>kuis</strong>, kosakata lewat <strong>flashcard per mini deck 10 kartu</strong>. Yang belum nempel masuk tumpukan ulang dan muncul lagi nanti. Ada juga hitung mundur ke ujian 6 Desember 2026 — jadi kamu selalu tahu ritmenya. Nggak perlu milih-milih dulu.</p></li>
           <li><span class="g-num">2</span><p><strong>Di dalam misi:</strong> baca materi kilatnya, lalu jawab kuis / flashcard / listening-nya sampai selesai. Tebak dulu, baru lihat benar-salahnya — di situlah materinya nempel. Skor dan XP tersimpan otomatis di HP ini.</p></li>
           <li><span class="g-num">3</span><p><strong>Furigana</strong> (bacaan kecil di atas kanji) bisa dinyalakan atau dimatikan pakai sakelar di dalam misi. Nyalakan saja kalau kanjinya belum lancar.</p></li>
           <li><span class="g-num">4</span><p><strong>Dokkai (membaca) memang terkunci:</strong> terjemahan dan pembahasan baru terbuka setelah semua soalnya kamu jawab. Sengaja, biar latihannya beneran seperti ujian.</p></li>
@@ -904,13 +895,6 @@ function renderHome(){
   el("badgeRow").innerHTML=badges.length?badges.map(function(b){return '<span class="badge b-skill">'+esc(b)+'</span>';}).join(""):'<span class="hint" style="color:var(--muted);font-size:.85rem">Lencana muncul di sini setelah misi pertamamu selesai.</span>';
   renderExam();
   renderSteps();
-  // mission: next lesson on the path (Review N5 -> Fondasi N4 -> N3) + first incomplete N3
-  var mFirst=LESSONS.filter(function(l){return !state.done[l.id];})[0];
-  var mN3=LESSONS.filter(function(l){return l.level==="N3"&&!state.done[l.id];})[0];
-  var missions=[mFirst,(mN3&&mFirst&&mN3.id!==mFirst.id)?mN3:null].filter(Boolean);
-  var step3Head='<div class="step-row"><span class="step-num">3</span><div class="step-body"><div class="step-title">Lanjut materi</div><div class="step-meta">Misi berikutnya di jalurmu + satu target N3.</div></div></div>';
-  if(!missions.length){el("missionList").innerHTML=step3Head+'<p style="opacity:.9">Semua misi sudah selesai. Ulang tumpukan pengulangan di bawah, atau ulangi misi favoritmu dari jalur belajar.</p>';}
-  else{el("missionList").innerHTML=step3Head+missions.map(function(l){return '<div class="mission-item"><div class="mi-body"><div class="mi-title">'+esc(l.title)+'</div><div class="mi-meta">'+l.level+' • '+esc(l.skill)+' • ±'+l.minutes+' menit • <span class="jp">'+esc(l.pattern)+'</span></div></div><button class="btn btn-indigo btn-small" type="button" data-start="'+l.id+'">Mulai</button></div>';}).join("");}
   // groups
   var groups=["Review N5","Fondasi N4","Grammar N3","Kosakata & Kanji N3","Listening & Reading","Dokkai • 読解"];
   el("lessonGroups").innerHTML=groups.map(function(g){
