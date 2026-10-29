@@ -75,3 +75,11 @@ termasuk menolak dengan alasan — lalu menerbitkan yang lolos dan memverifikasi
 
 ## Pembaruan 29 Okt 2026 — Ekspansi 1 TERBIT
 Ekspansi 1 sudah live (commit f079311): bunpō pola 71–89 sebagai Tema 9 （目的・方法・動作， 7 pola), Tema 10 （ルール・アドバイス, 6 pola), Tema 11 （並列， 6 pola) — masing-masing lengkap Penjelasan + kuis + Latihan Bikin Kalimat — plus 30 kata kosakata lanjutan urut daftar Bab 1 ("batch hari 13–15"; buku tidak punya pembagian hari dan tidak menyediakan arti — arti ditulis untuk aplikasi ini). Semua unit ekspansi TERKUNCI sampai 13 unit inti selesai (gerbang sesuai keputusan Ray), tampil sebagai teaser berkunci. Kuis campuran hanya memakai kolam inti selama ekspansi terkunci. Urutan berikutnya: Kotoba produksi, lalu Dokkai set 1, lalu Chōkai (menunggu keputusan format audio dari Ray).
+
+---
+
+## Pembaruan 29 Oktober 2026 (sore) — Dokkai set 1 TERBIT & prinsip pengingat Minna
+
+**Dokkai set 1 sudah live** (commit b7deb51, terverifikasi 6/6): 4 teks orisinal — pengumuman perpustakaan （短文）, email perubahan rencana （短文）, pamflet kelas memasak (pencarian info bersyarat), esai pengalaman （中文）; total 9 soal. Model tipe soal & tingkat kesulitan mengacu pada 『新完全マスター読解 N3』 dan 『JLPT N3 完全模試』 (keduanya milik Ray, dibedah strukturnya); tema kosakata mengikuti bukunya. Setiap teks dilengkapi strategi membaca + satu tips praktis berbahasa Indonesia sederhana di intro, 4 kartu kata kunci dari teks, dan terjemahan+pembahasan yang terkunci sampai semua soal dijawab. Kategori Dokkai kini aktif (sebelumnya hanya catatan "lagi disiapkan"); misi inti & gerbang Ekspansi tidak berubah.
+
+**Prinsip konten baru — "pengingat Minna":** bila konsep N3 membingungkan, penjelasan boleh menyisipkan satu baris pengingat ke konsep serupa di buku level dasar (Minna no Nihongo I/II), dengan syarat: (1) sifatnya hanya jembatan ingatan, BUKAN materi yang harus dipelajari; (2) ditulis jujur bahwa penyajiannya berbeda di level dasar; (3) rujukan jilid/bab wajib diverifikasi dari PDF Minna milik Ray sebelum ditulis — tidak boleh mengarang nomor bab.
