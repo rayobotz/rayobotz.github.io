@@ -72,3 +72,6 @@ termasuk menolak dengan alasan — lalu menerbitkan yang lolos dan memverifikasi
 - "Misi Hari Ini — 3 Langkah" tetap ada sebagai roadmap harian; langkah-langkahnya kini menunjuk unit materi buku (tema bunpō berikutnya, deck kosakata berikutnya, antrean kuis yang skornya belum sempurna).
 - Dokkai & Listening: belum ada materi dari buku; tombolnya menampilkan catatan "lagi disiapkan" (Ray belum memutuskan sumber/formatnya). Jangan mengusulkan konten dokkai/listening seolah sudah diputuskan.
 - Ekspansi berikutnya mengikuti buku yang sama: pola bunpō 71–88 dst. + kosakata hari 13–15, bertahap.
+
+## Pembaruan 29 Okt 2026 — Ekspansi 1 TERBIT
+Ekspansi 1 sudah live (commit f079311): bunpō pola 71–89 sebagai Tema 9 （目的・方法・動作， 7 pola), Tema 10 （ルール・アドバイス, 6 pola), Tema 11 （並列， 6 pola) — masing-masing lengkap Penjelasan + kuis + Latihan Bikin Kalimat — plus 30 kata kosakata lanjutan urut daftar Bab 1 ("batch hari 13–15"; buku tidak punya pembagian hari dan tidak menyediakan arti — arti ditulis untuk aplikasi ini). Semua unit ekspansi TERKUNCI sampai 13 unit inti selesai (gerbang sesuai keputusan Ray), tampil sebagai teaser berkunci. Kuis campuran hanya memakai kolam inti selama ekspansi terkunci. Urutan berikutnya: Kotoba produksi, lalu Dokkai set 1, lalu Chōkai (menunggu keputusan format audio dari Ray).
