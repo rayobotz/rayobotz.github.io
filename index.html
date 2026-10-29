@@ -149,9 +149,15 @@ section{margin-top:30px}
 #lessonView{display:none}
 #homeView.hidden{display:none}
 #lessonView.open{display:block}
-.lv-top{display:flex;align-items:center;gap:10px;padding:16px 0 6px;position:sticky;top:0;background:var(--bg);z-index:5}
+.lv-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0 8px;position:sticky;top:0;background:var(--bg);z-index:5}
+.lv-top .btn{font-size:.82rem;padding:7px 12px}
+.lv-top .btnFuri{margin-left:auto}
+.lv-title-row{display:flex;align-items:baseline;gap:10px}
+.lv-title-row .lv-t{font-weight:800;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-title-row .lv-s{margin-left:auto;font-weight:700;font-size:.76rem;color:var(--muted);white-space:nowrap}
+.lv-top .progressbar{height:6px;margin-top:6px}
 .lv-top .back{flex-shrink:0}
-.lv-progress{flex:1}
+.lv-progress{flex:1 1 100%;min-width:0}
 .step-label{font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
 .cardbox{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-top:10px}
 .cardbox h2{font-size:1.35rem;line-height:1.3;margin:6px 0 10px}
@@ -465,12 +471,11 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
   <div id="lessonView" aria-live="polite">
     <div class="lv-top">
       <button class="btn btn-indigo back" id="btnBack" type="button">← Kembali ke Beranda</button>
+      <button class="btn btn-ghost btn-small btnFuri" type="button">Furigana: tampil</button>
       <div class="lv-progress">
-        <div style="font-weight:800;font-size:.95rem" id="lvTitle">Misi</div>
+        <div class="lv-title-row"><div class="lv-t" id="lvTitle">Misi</div><div class="lv-s" id="lvStepText">1/4</div></div>
         <div class="progressbar"><i id="lvBar"></i></div>
       </div>
-      <div style="font-weight:800" id="lvStepText">1/4</div>
-      <button class="btn btn-ghost btn-small btnFuri" type="button">Furigana: tampil</button>
     </div>
     <div id="lvBody"></div>
   </div>
@@ -479,11 +484,11 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
   <div id="catView" aria-live="polite">
     <div class="lv-top">
       <button class="btn btn-indigo back" id="btnCatBack" type="button">← Kembali ke Beranda</button>
+      <button class="btn btn-ghost btn-small btnFuri" type="button">Furigana: tampil</button>
       <div class="lv-progress">
-        <div style="font-weight:800;font-size:.95rem" id="catTitle">Kategori</div>
+        <div class="lv-t" id="catTitle" style="font-size:.95rem">Kategori</div>
         <div style="font-weight:700;font-size:.8rem;color:var(--muted)" id="catSub"></div>
       </div>
-      <button class="btn btn-ghost btn-small btnFuri" type="button">Furigana: tampil</button>
     </div>
     <div id="catBody" style="margin-top:16px"></div>
   </div>
