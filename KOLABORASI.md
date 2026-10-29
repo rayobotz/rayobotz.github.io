@@ -64,3 +64,11 @@ Ekspansi publik adalah agenda setelah musim ujian (Desember 2026 / Januari 2027)
 Sampaikan: (1) masalah/temuan dengan bukti, (2) usulan konkret, (3) risiko & alternatif,
 (4) bagian mana dari aturan di atas yang relevan. Muse akan mengevaluasi secara independen —
 termasuk menolak dengan alasan — lalu menerbitkan yang lolos dan memverifikasinya live.
+
+## Pembaruan 29 Oktober 2026 — pivot materi inti
+
+- Pelajaran buatan lama (Review N5, Fondasi N4, dan 15 pelajaran N3: grammar/kosakata/listening/reading/dokkai) DIHAPUS dari aplikasi.
+- Yang dulu bernama "Mode Penguat" sekarang adalah MATERI INTI dan tampil sebagai bagian "Materi dari bukumu": 8 tema bunpō (Penjelasan + kuis), 3 deck flashcard kosakata hari 1–12, kuis campuran 70 pola, kuis konteks kosakata. Istilah "Mode Penguat" tidak lagi dipakai di aplikasi.
+- "Misi Hari Ini — 3 Langkah" tetap ada sebagai roadmap harian; langkah-langkahnya kini menunjuk unit materi buku (tema bunpō berikutnya, deck kosakata berikutnya, antrean kuis yang skornya belum sempurna).
+- Dokkai & Listening: belum ada materi dari buku; tombolnya menampilkan catatan "lagi disiapkan" (Ray belum memutuskan sumber/formatnya). Jangan mengusulkan konten dokkai/listening seolah sudah diputuskan.
+- Ekspansi berikutnya mengikuti buku yang sama: pola bunpō 71–88 dst. + kosakata hari 13–15, bertahap.
