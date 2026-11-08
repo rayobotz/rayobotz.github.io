@@ -288,6 +288,28 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
 .prod-ta{width:100%;border:1.5px solid #E3D9C6;border-radius:12px;padding:10px 12px;font-size:1rem;background:#FFFDF6;color:var(--ink);font-family:inherit;resize:vertical;margin-top:8px}
 .prod-model{background:var(--note);border-radius:12px;padding:12px 14px;margin-top:10px}
 .prod-state{font-weight:700;margin-top:8px;min-height:1.2em}
+
+/* ===== Mode Sprint (patch-sprint) ===== */
+.sprint-card h3{margin-bottom:6px}
+.rdy-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.rdy-row:last-child{border-bottom:none}
+.rdy-name{font-weight:700;flex:1;min-width:110px}
+.rdy-badge{font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.rdy-badge.ok{background:var(--good-bg);color:var(--good)}
+.rdy-badge.warn{background:var(--bad-bg);color:var(--bad)}
+.rdy-badge.mid{background:var(--gold-soft);color:var(--gold)}
+.rdy-num{font-size:.8rem;color:var(--muted)}
+.try-timer{float:right;font-weight:800;font-size:.9rem;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.try-timer.low{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.choices .choice.sel{border-color:var(--indigo);background:var(--indigo-soft);font-weight:700}
+.try-nav{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}
+.try-dot{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:.82rem}
+.try-dot.done{background:var(--teal-soft);border-color:var(--teal)}
+.try-dot.cur{border-color:var(--indigo);box-shadow:0 0 0 2px var(--indigo-soft)}
+.try-skill-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}
+.try-wrong{margin:6px 0 6px 18px}
+.try-wrong li{margin-bottom:8px}
+.tq-badge{display:inline-block;font-size:.68rem;font-weight:800;background:var(--gold-soft);color:var(--gold);border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:1px}
 </style>
 </head>
 <body>
@@ -353,6 +375,20 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
       <div class="exam-card tape tape-kinako">
         <h3 id="examTitle">Hitung mundur ujian</h3>
         <div id="examBody"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="sprintTitle">
+      <div class="exam-card tape tape-matcha sprint-card">
+        <h3 id="sprintTitle">🏃 Mode Sprint — pemanasan ujian</h3>
+        <p class="sprint-lead" id="sprintLead"></p>
+        <div id="sprintInfo" style="margin:8px 0"></div>
+        <div id="sprintSkills"></div>
+        <p id="sprintLastTry" class="hint" style="margin-top:8px"></p>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn btn-accent" type="button" id="btnTryoutStart">Mulai Tryout Mini — 20 soal • 25 menit</button>
+          <button class="btn btn-ghost" type="button" id="btnSprintQueue">Lihat yang perlu diulang ↓</button>
+        </div>
       </div>
     </section>
 
@@ -555,7 +591,7 @@ function levelFromXp(xp){var lv=1,i;for(i=0;i<THRESH.length;i++){if(xp>=THRESH[i
    Semua progres disimpan di browser pengguna di perangkat yang sama.
    Tidak dikirim ke server / siapa pun. */
 var STORAGE_KEY="aplikasi-belajar-n3:progress:v1";
-var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{}};
+var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{},lastTryout:null,tryoutWrong:[],tryoutCount:0};
 var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,guideSeen:false,introSeen:false};
 var state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
@@ -563,7 +599,7 @@ function todayStr(){var d=new Date();var m=("0"+(d.getMonth()+1)).slice(-2);var 
 function yesterdayStr(){var d=new Date();d.setDate(d.getDate()-1);var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
 function markStudyToday(){var today=todayStr();if(studyMeta.lastStudyDate===today)return;if(studyMeta.lastStudyDate===yesterdayStr()){studyMeta.streakDays=(studyMeta.streakDays||0)+1;}else{studyMeta.streakDays=1;}studyMeta.lastStudyDate=today;}
 function saveProgress(){try{studyMeta.savedAt=new Date().toISOString();studyMeta.lastOpenedAt=studyMeta.savedAt;var payload={version:1,state:state,meta:studyMeta};localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));var sh=document.getElementById("saveHint");if(sh){sh.textContent="Tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari"):"")+" • Terakhir disimpan: "+new Date().toLocaleString("id-ID");}var ss=document.getElementById("saveStatus");if(ss&&studyMeta.savedAt){/* keep base text; status shown via saveHint */}}catch(e){/* storage penuh / mode privat — aplikasi tetap jalan tanpa menyimpan */}}
-function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=Array.isArray(data.state.review)?data.state.review:[];state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
+function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=Array.isArray(data.state.review)?data.state.review:[];state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};state.lastTryout=data.state.lastTryout&&typeof data.state.lastTryout==="object"?data.state.lastTryout:null;state.tryoutWrong=Array.isArray(data.state.tryoutWrong)?data.state.tryoutWrong:[];state.tryoutCount=typeof data.state.tryoutCount==="number"?data.state.tryoutCount:0;}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
 loadProgress();
 (function(){var now=new Date().toISOString();if(!studyMeta.firstOpenedAt)studyMeta.firstOpenedAt=now;studyMeta.lastOpenedAt=now;studyMeta.totalOpens=(studyMeta.totalOpens||0)+1;})();
 window.addEventListener("beforeunload",function(){try{saveProgress();}catch(e){}});
@@ -716,17 +752,21 @@ function renderHome(){
   el("badgeRow").innerHTML=badges.length?badges.map(function(b){return '<span class="badge b-skill">'+esc(b)+'</span>';}).join(""):'<span class="hint" style="color:var(--muted);font-size:.85rem">Lencana muncul di sini setelah misi pertamamu selesai.</span>';
   renderExam();
   renderSteps();
+  renderSprint();
   // mission step 3: next book-material units (bunpo theme + vocab deck)
-  var step3Head='<div class="step-row"><span class="step-num">3</span><div class="step-body"><div class="step-title">Lanjut materi</div><div class="step-meta">Misi berikutnya dari bukumu.</div></div></div>';
+  var eiH=examInfo();var sprintPhase=eiH.dExam>=0&&eiH.dTarget<=0;
+  var step3Head=sprintPhase?'<div class="step-row"><span class="step-num">3</span><div class="step-body"><div class="step-title">Tryout Mini — rasa ujian beneran</div><div class="step-meta">Fase sprint: materi ditargetkan selesai — sekarang ukur rasanya dengan tryout.</div></div></div>':'<div class="step-row"><span class="step-num">3</span><div class="step-body"><div class="step-title">Lanjut materi</div><div class="step-meta">Misi berikutnya dari bukumu.</div></div></div>';
   var mItems=[];
   var nTheme=-1,nThemeMax=expOpen()?GRAM_THEMES.length:CORE_GRAM;GRAM_THEMES.forEach(function(t,i){if(i<nThemeMax&&nTheme<0&&!state.done["gq-"+i])nTheme=i;});
-  if(nTheme>=0){var tt=GRAM_THEMES[nTheme];mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Bunpō Tema '+(nTheme+1)+' — '+esc(tt.name)+'</div><div class="mi-meta">'+tt.items.length+' pola dari bukumu • baca Penjelasan dulu, lalu kuisnya (10 soal)</div></div><button class="btn btn-ghost btn-small" type="button" data-gexplain="'+nTheme+'">Penjelasan</button><button class="btn btn-indigo btn-small" type="button" data-gquiz="'+nTheme+'">Kuis</button></div>');}
+  if(sprintPhase){mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Tryout Mini N3 — 20 soal • 25 menit</div><div class="mi-meta">Campuran Bunpō, Kosakata, Listening & Dokkai dari bank soal di aplikasi ini. Yang salah masuk Antrean Perlu Diulang.</div></div><button class="btn btn-indigo btn-small" type="button" data-tryout-start="1">Mulai Tryout</button></div>');}
+  if(nTheme>=0&&!sprintPhase){var tt=GRAM_THEMES[nTheme];mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Bunpō Tema '+(nTheme+1)+' — '+esc(tt.name)+'</div><div class="mi-meta">'+tt.items.length+' pola dari bukumu • baca Penjelasan dulu, lalu kuisnya (10 soal)</div></div><button class="btn btn-ghost btn-small" type="button" data-gexplain="'+nTheme+'">Penjelasan</button><button class="btn btn-indigo btn-small" type="button" data-gquiz="'+nTheme+'">Kuis</button></div>');}
   var nDeck=-1,nDeckMax=expOpen()?VOCAB_CATS.length:CORE_VOCAB;VOCAB_CATS.forEach(function(c,i){if(i<nDeckMax&&nDeck<0&&!state.done["vd-"+i])nDeck=i;});
-  if(nDeck>=0){var cc=VOCAB_CATS[nDeck];mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Flashcard Kosakata — '+esc(cc.name)+'</div><div class="mi-meta">'+cc.words.length+' kata dari bukumu • per mini deck 10 kartu, santai aja</div></div><button class="btn btn-indigo btn-small" type="button" data-vdeck="'+nDeck+'">Mulai</button></div>');}
+  if(nDeck>=0&&!sprintPhase){var cc=VOCAB_CATS[nDeck];mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Flashcard Kosakata — '+esc(cc.name)+'</div><div class="mi-meta">'+cc.words.length+' kata dari bukumu • per mini deck 10 kartu, santai aja</div></div><button class="btn btn-indigo btn-small" type="button" data-vdeck="'+nDeck+'">Mulai</button></div>');}
   if(!mItems.length&&!state.done[VOCAB_CTX_LESSON.id]){mItems.push('<div class="mission-item"><div class="mi-body"><div class="mi-title">Kuis Konteks Kosakata — model soal JLPT</div><div class="mi-meta">8 soal orisinal memakai kata hari 1–12 dari bukumu</div></div><button class="btn btn-indigo btn-small" type="button" data-ctx="1">Mulai</button></div>');}
   if(!mItems.length){el("missionList").innerHTML=step3Head+'<p style="opacity:.9">Semua materi dari bukumu sudah selesai. Ulang tumpukan pengulangan di bawah, atau ulangi tema favoritmu.</p>';}
   else{el("missionList").innerHTML=step3Head+mItems.join("");}
   wireBoostButtons(el("missionList"));
+  var tbs=el("missionList").querySelectorAll("[data-tryout-start]");for(var tbi=0;tbi<tbs.length;tbi++){tbs[tbi].addEventListener("click",startTryoutMini);}
   // review
   el("reviewHeading").textContent="Tumpukan ulang: "+state.review.length+" kartu";
   el("reviewText").textContent=state.review.length?"Kartu-kartu ini belum nempel. Tumpukan ini tersimpan, jadi boleh diulang sekarang atau nanti saat kamu buka lagi — tandai ‘Sudah hafal’ buat mengeluarkannya dari tumpukan.":"Kerjakan satu misi dulu — kartu yang belum nempel akan berkumpul di sini dan tersimpan buat diulang kapan saja.";
@@ -779,7 +819,7 @@ function openCatView(key){
 }
 function closeCatView(){if(catHist){catHist=false;try{history.back();return;}catch(e){}}el("catView").classList.remove("open");el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}
 function openLessonView(){if(!el("homeView").classList.contains("hidden")){homeScrollY=window.scrollY||0;}lvReturn=el("catView").classList.contains("open")?"cat":"home";el("catView").classList.remove("open");el("homeView").classList.add("hidden");el("lessonView").classList.add("open");window.scrollTo(0,0);if(!lvHist){try{history.pushState({n3lesson:1},"");lvHist=true;}catch(e){}}}
-function closeLessonView(){if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){renderCatBody();el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
+function closeLessonView(){stopTryoutTimer();if(lvHist){lvHist=false;try{history.back();return;}catch(e){}}stopAudio();el("lessonView").classList.remove("open");if(lvReturn==="cat"){renderCatBody();el("catView").classList.add("open");window.scrollTo(0,0);}else{el("homeView").classList.remove("hidden");renderHome();window.scrollTo(0,homeScrollY||0);}}
 if(window.addEventListener){window.addEventListener("popstate",function(){if(el("lessonView").classList.contains("open")){lvHist=false;closeLessonView();}else if(el("catView").classList.contains("open")){catHist=false;closeCatView();}});}
 function stopAudio(){var a=document.querySelectorAll("audio");for(var i=0;i<a.length;i++){try{a[i].pause();}catch(e){}}}
 function setProgress(){
@@ -1306,6 +1346,7 @@ function summaryText(){
   } else { lines.push("","Belum ada misi berskor yang selesai \u2014 baru mulai."); }
   var qS=antreanUlang();
   if(qS.length){lines.push("","Antrean perlu diulang (skor terbaik belum sempurna):");qS.forEach(function(u){lines.push("\u2022 "+u.title+" ("+u.score+"/"+u.max+")");});}
+  if(state.lastTryout){var lt2=state.lastTryout;var pp=[];for(var kk in lt2.perSkill){pp.push(kk+" "+lt2.perSkill[kk].c+"/"+lt2.perSkill[kk].t);}lines.push("","Tryout Mini terakhir ("+new Date(lt2.date).toLocaleDateString("id-ID")+"): "+lt2.correct+"/"+lt2.total+" benar ("+Math.round(lt2.correct/lt2.total*100)+"%) — "+pp.join(" • "));if(state.tryoutWrong&&state.tryoutWrong.length)lines.push("Soal tryout yang masih perlu diulang: "+state.tryoutWrong.length+" soal");}
   lines.push("","Kartu di tumpukan ulang: "+state.review.length+" kartu");
   return lines.join("\n");
 }
@@ -1326,9 +1367,10 @@ function renderProgres(){
   }
   var q=antreanUlang();
   var queueHtml="";
-  if(q.length||state.review.length){
+  if(q.length||state.review.length||(state.tryoutWrong&&state.tryoutWrong.length)){
+    var twItems=(state.tryoutWrong||[]).map(function(w){return '<li><span><span class="tq-badge">Tryout</span>'+esc(w.front)+' — '+esc(w.meaning||w.explain||'')+'</span></li>';}).join("");
     var items=q.map(function(u){return '<li><span>'+esc(u.title)+' — skor terbaik '+u.score+'/'+u.max+'</span>'+(u.startable?(u.gquiz!==undefined?('<button class="btn btn-ghost btn-small" type="button" data-gquiz="'+u.gquiz+'">Ulangi</button>'):('<button class="btn btn-ghost btn-small" type="button" data-start="'+u.id+'">Ulangi</button>')):"")+'</li>';}).join("");
-    queueHtml='<div class="prog-card" style="margin-top:10px"><h3>Antrean Perlu Diulang</h3>'+(q.length?('<ul class="queue-list">'+items+'</ul>'):'<p>Belum ada kuis selesai yang skornya belum sempurna.</p>')+'<p class="hint" style="margin-top:8px">Kartu di tumpukan ulang: '+state.review.length+' kartu. Jujur ya: aplikasi ini tidak menyimpan catatan per butir soal, jadi antrean ini dihitung dari <strong>skor terbaik tiap kuis</strong> + kartu yang masuk tumpukan ulang — bukan dari soal mana saja yang pernah kamu jawab salah.</p></div>';
+    queueHtml='<div class="prog-card" style="margin-top:10px"><h3>Antrean Perlu Diulang</h3>'+((q.length||twItems)?('<ul class="queue-list">'+twItems+items+'</ul>'):'<p>Belum ada kuis selesai yang skornya belum sempurna.</p>')+'<p class="hint" style="margin-top:8px">Kartu di tumpukan ulang: '+state.review.length+' kartu. Jujur ya: aplikasi ini tidak menyimpan catatan per butir soal, jadi antrean ini dihitung dari <strong>skor terbaik tiap kuis</strong> + kartu yang masuk tumpukan ulang — bukan dari soal mana saja yang pernah kamu jawab salah.</p></div>';
   }
   box.innerHTML='<div class="prog-grid">'+cards+"</div>"+lists+queueHtml;
   var qb=box.querySelectorAll("[data-start]");
@@ -1380,6 +1422,124 @@ var bk=document.getElementById("btnGuideBack");if(bk)bk.addEventListener("click"
 var bsk=document.getElementById("btnIntroSkip");if(bsk)bsk.addEventListener("click",closeGuide);
 var bs=document.getElementById("btnGuideStart");if(bs)bs.addEventListener("click",closeGuide);
 if(!studyMeta.introSeen)openGuide();
+
+
+/* ===== Mode Sprint: Tryout Mini (patch-sprint) ===== */
+var TRYOUT_SECONDS=25*60;
+var tryoutTimer=null,tryoutQs=null,tryoutIdx=0,tryoutAnswers=[],tryoutLeft=TRYOUT_SECONDS,tryoutStartedAt=0,tryoutDokRecap=[];
+function fmtClock(s){s=Math.max(0,s);var m=Math.floor(s/60),d=s%60;return m+":"+(d<10?"0":"")+d;}
+function stopTryoutTimer(){if(tryoutTimer){clearInterval(tryoutTimer);tryoutTimer=null;}}
+function tqShuffle(q){var pairs=q.choices.map(function(c,i){return {t:c,ok:i===q.answer};});pairs=shuffle(pairs);q.choices=pairs.map(function(p){return p.t;});for(var i=0;i<pairs.length;i++){if(pairs[i].ok)q.answer=i;}return q;}
+function buildTryoutQuestions(){
+  var qs=[];
+  var pool=[];GRAM_THEMES.forEach(function(t){t.items.forEach(function(it){pool.push({t:t,it:it});});});
+  var allMean=pool.map(function(x){return x.it.m;});
+  shuffle(pool).slice(0,6).forEach(function(x){
+    var ds=shuffle(allMean.filter(function(m){return m!==x.it.m;})).slice(0,3);
+    var c=mkChoices(x.it.m,ds);
+    qs.push({skill:"Bunpō",prompt:"Pola di kalimat ini — arti & pemakaiannya yang paling tepat?",promptJp:x.it.ex,choices:c.choices,answer:c.answer,explain:"Pola "+x.it.p+" = "+x.it.m+". Contoh: "+x.it.exId,front:x.it.p,reading:x.t.name,meaning:x.it.m});
+  });
+  var vpool=[];VOCAB_CATS.forEach(function(c2){c2.words.forEach(function(w){vpool.push(w);});});
+  var allM=vpool.map(function(w){return w.m;});
+  shuffle(vpool).slice(0,4).forEach(function(w){
+    var ds=shuffle(allM.filter(function(m){return m!==w.m;})).slice(0,3);
+    var c=mkChoices(w.m,ds);
+    qs.push({skill:"Kosakata",prompt:"Apa arti kata ini?",promptJp:w.w,choices:c.choices,answer:c.answer,explain:w.w+" ("+w.r+") = "+w.m,front:w.w,reading:w.r,meaning:w.m});
+  });
+  shuffle(VOCAB_CTX_LESSON.questions.slice()).slice(0,2).forEach(function(q){
+    qs.push(tqShuffle({skill:"Kosakata",prompt:q.prompt,promptJp:q.promptJp,choices:q.choices.slice(),answer:q.answer,explain:q.explain,front:stripFuri(q.promptJp||q.prompt||"").slice(0,60),reading:"Kuis konteks",meaning:q.explain}));
+  });
+  var ckPool=[];LESSONS.forEach(function(l){if(l.skill==="Chōkai")l.questions.forEach(function(q){ckPool.push(q);});});
+  shuffle(ckPool).slice(0,4).forEach(function(q){
+    qs.push(tqShuffle({skill:"Listening",prompt:q.prompt,promptJp:null,choices:q.choices.slice(),answer:q.answer,explain:q.explain,audioQ:q,transcript:q.transcript,front:stripFuri(q.transcript||"").slice(0,60),reading:"Chōkai",meaning:q.explain}));
+  });
+  tryoutDokRecap=[];
+  var dokLessons=shuffle(LESSONS.filter(function(l){return l.skill==="Dokkai"&&l.questions.length>=2&&l.passageJp;})).slice(0,2);
+  dokLessons.forEach(function(l){
+    var rec={title:l.title,passageId:l.passageId||"",items:[]};
+    shuffle(l.questions.slice()).slice(0,2).forEach(function(q){
+      qs.push(tqShuffle({skill:"Dokkai",prompt:q.prompt,promptJp:null,passage:l.passageJp,choices:q.choices.slice(),answer:q.answer,explain:q.explain,front:stripFuri(q.prompt||"").slice(0,60),reading:l.title,meaning:q.explain}));
+      rec.items.push({prompt:q.prompt,explain:q.explain});
+    });
+    tryoutDokRecap.push(rec);
+  });
+  return shuffle(qs);
+}
+function startTryoutMini(){
+  tryoutQs=buildTryoutQuestions();tryoutIdx=0;tryoutAnswers=[];for(var i=0;i<tryoutQs.length;i++)tryoutAnswers.push(-1);
+  tryoutLeft=TRYOUT_SECONDS;tryoutStartedAt=Date.now();
+  openLessonView();
+  el("lvTitle").textContent="🏃 Tryout Mini N3";
+  stopTryoutTimer();
+  tryoutTimer=setInterval(function(){tryoutLeft=Math.max(0,TRYOUT_SECONDS-Math.floor((Date.now()-tryoutStartedAt)/1000));var t=el("tryTimer");if(t){t.textContent="⏱ "+fmtClock(tryoutLeft);if(tryoutLeft<=60)t.classList.add("low");}if(tryoutLeft<=0)finishTryout(true);},500);
+  renderTryoutQuestion();
+  window.scrollTo(0,0);
+}
+function renderTryoutQuestion(){
+  var q=tryoutQs[tryoutIdx];if(!q){finishTryout(false);return;}
+  el("lvStepText").textContent="Tryout "+(tryoutIdx+1)+"/"+tryoutQs.length;
+  el("lvBar").style.width=Math.round(tryoutAnswers.filter(function(a){return a>=0;}).length/tryoutQs.length*100)+"%";
+  var h='<div class="cardbox"><span class="step-label">Tryout Mini • Soal '+(tryoutIdx+1)+'/'+tryoutQs.length+' — '+esc(q.skill)+'</span><span class="try-timer" id="tryTimer">⏱ '+fmtClock(tryoutLeft)+'</span>';
+  if(q.passage)h+=dokkaiBannerHtml()+'<div class="passage"><div class="jp">'+fjp(q.passage)+'</div></div><p class="hint">🔒 Terjemahan teks ini terkunci selama tryout — terbuka di layar hasil, seperti aturan Dokkai biasa.</p>';
+  h+='<h2 class="q-prompt">'+(q.skill==="Dokkai"?fjp(q.prompt):esc(q.prompt))+'</h2>';
+  if(q.promptJp)h+='<div class="q-prompt-jp jp">'+fjp(q.promptJp)+'</div>';
+  if(q.audioQ)h+='<div class="audio-row"><p>Tekan Putar — dengarkan baik-baik (boleh diulang):</p><audio controls preload="metadata" src="'+audioSrc(q.audioQ)+'"></audio></div><p class="hint">🔒 Transkrip terkunci selama tryout — terbuka di layar hasil.</p>';
+  h+='<div class="choices" id="choices">'+q.choices.map(function(c,i){return '<button class="choice jp'+(tryoutAnswers[tryoutIdx]===i?" sel":"")+'" type="button" data-tchoice="'+i+'">'+fjp(c)+'</button>';}).join("")+'</div>';
+  h+='<div class="try-nav">'+tryoutQs.map(function(_,i){return '<button type="button" class="try-dot'+(i===tryoutIdx?" cur":"")+(tryoutAnswers[i]>=0?" done":"")+'" data-tgo="'+i+'">'+(i+1)+'</button>';}).join("")+'</div>';
+  h+='<div class="actions"><button class="btn btn-ghost" type="button" id="btnTryPrev"'+(tryoutIdx===0?" disabled":"")+'>← Sebelumnya</button><button class="btn btn-accent" type="button" id="btnTryNext">'+(tryoutIdx===tryoutQs.length-1?"Selesai & lihat hasil →":"Berikutnya →")+'</button></div>';
+  h+='<div class="actions"><button class="btn btn-ghost btn-small" type="button" id="btnTryQuit">Akhiri tryout sekarang</button></div>';
+  h+='<p class="hint">Seperti ujian beneran: belum ada kunci jawaban di tengah jalan. Pilih jawaban tiap soal (boleh ganti-ganti), loncat antar soal pakai nomor-nomor di atas, dan semua pembahasan muncul di layar hasil.</p></div>';
+  el("lvBody").innerHTML=h;
+  var bs=el("lvBody").querySelectorAll("[data-tchoice]");for(var i=0;i<bs.length;i++)bs[i].addEventListener("click",function(){tryoutAnswers[tryoutIdx]=parseInt(this.getAttribute("data-tchoice"),10);renderTryoutQuestion();});
+  var ds=el("lvBody").querySelectorAll("[data-tgo]");for(var j=0;j<ds.length;j++)ds[j].addEventListener("click",function(){tryoutIdx=parseInt(this.getAttribute("data-tgo"),10);renderTryoutQuestion();window.scrollTo(0,0);});
+  var pv=el("btnTryPrev");if(pv)pv.addEventListener("click",function(){if(tryoutIdx>0){tryoutIdx--;renderTryoutQuestion();window.scrollTo(0,0);}});
+  var nx=el("btnTryNext");if(nx)nx.addEventListener("click",function(){if(tryoutIdx<tryoutQs.length-1){tryoutIdx++;renderTryoutQuestion();window.scrollTo(0,0);}else{finishTryout(false);}});
+  var qt=el("btnTryQuit");if(qt)qt.addEventListener("click",function(){if(window.confirm("Akhiri tryout sekarang? Soal yang belum dijawab dihitung belum benar."))finishTryout(false);});
+}
+function finishTryout(auto){
+  if(!tryoutQs)return;stopTryoutTimer();stopAudio();
+  var per={},correct=0,wrongQs=[];
+  tryoutQs.forEach(function(q,i){if(!per[q.skill])per[q.skill]={c:0,t:0};per[q.skill].t++;if(tryoutAnswers[i]===q.answer){per[q.skill].c++;correct++;}else{wrongQs.push(q);}});
+  var usedSec=TRYOUT_SECONDS-tryoutLeft;
+  state.xp+=correct*5;state.tryoutCount=(state.tryoutCount||0)+1;
+  state.lastTryout={date:new Date().toISOString(),correct:correct,total:tryoutQs.length,perSkill:per,secondsUsed:usedSec,auto:!!auto};
+  var merged=(state.tryoutWrong||[]).filter(function(w){return !tryoutQs.some(function(q,i){return q.front===w.front&&tryoutAnswers[i]===q.answer;});});
+  wrongQs.forEach(function(q){
+    if(!merged.some(function(w){return w.front===q.front;}))merged.push({skill:q.skill,front:q.front,reading:q.reading||"",meaning:q.meaning||q.explain||"",explain:q.explain||""});
+    addReview({front:q.front,reading:q.reading||q.skill,meaning:"Jawaban benar: "+stripFuri(q.choices[q.answer])+" — "+(q.explain||"")});
+  });
+  state.tryoutWrong=merged;
+  markStudyToday();saveProgress();
+  var pct=Math.round(correct/tryoutQs.length*100);
+  var msg=pct>=80?"Kuat! Tinggal poles sisanya lewat Antrean.":pct>=50?"Setengah jalan nempel — yang bocor sudah dicatat di Antrean Perlu Diulang.":"Nggak apa-apa — tryout memang buat menemukan yang bocor. Yang salah sudah masuk Antrean, ulangi dari sana.";
+  var skillRows="";for(var sk in per){skillRows+='<div class="try-skill-row"><span>'+esc(sk)+'</span><strong>'+per[sk].c+'/'+per[sk].t+'</strong></div>';}
+  var wrongHtml=wrongQs.length?('<h3 style="margin-top:14px">Yang masih bocor ('+wrongQs.length+' soal)</h3><ul class="try-wrong">'+wrongQs.map(function(q){return '<li><strong>'+esc(q.skill)+'</strong> — '+esc(q.front)+'<br>Jawaban benar: <span class="jp">'+fjp(q.choices[q.answer])+'</span><br>'+fjp(q.explain||"")+'</li>';}).join("")+'</ul><p class="hint">Soal-soal ini masuk Antrean Perlu Diulang (di Progresku) dan tumpukan kartu ulang — dan keluar dari daftar tryout begitu kamu menjawabnya benar di tryout berikutnya.</p>'):'<p style="margin-top:12px">Tidak ada yang bocor. Sempurna!</p>';
+  var dokHtml=tryoutDokRecap.map(function(rec){return '<div class="dokkai-unlocked"><span class="du-badge">✓ Terjemahan &amp; pembahasan Dokkai terbuka — '+esc(rec.title)+'</span>'+(rec.passageId?('<h3>Terjemahan teks</h3><p class="du-trans">'+esc(rec.passageId)+'</p>'):'')+'<h3>Pembahasan soal tryout dari teks ini</h3><ol>'+rec.items.map(function(it){return '<li>'+fjp(it.explain||"")+'</li>';}).join("")+'</ol></div>';}).join("");
+  var lisQs=tryoutQs.filter(function(q){return q.skill==="Listening";});
+  var lisHtml=lisQs.length?('<div class="dokkai-unlocked"><span class="du-badge">✓ Transkrip Listening terbuka</span><ol>'+lisQs.map(function(q){return '<li><span class="jp">'+fjp(q.transcript||"")+'</span><br>Jawaban benar: '+fjp(q.choices[q.answer])+'<br>'+fjp(q.explain||"")+'</li>';}).join("")+'</ol></div>'):"";
+  el("lvTitle").textContent="🏃 Hasil Tryout Mini";
+  el("lvStepText").textContent="Selesai";
+  el("lvBar").style.width="100%";
+  el("lvBody").innerHTML='<div class="cardbox"><span class="step-label">Hasil Tryout Mini'+(auto?" — waktu habis, tryout ditutup otomatis":"")+'</span><div class="result-score">'+correct+'/'+tryoutQs.length+'</div><p class="result-sub">'+esc(msg)+'</p><p class="result-sub">Waktu terpakai: '+fmtClock(usedSec)+' dari 25:00 • +'+(correct*5)+' XP • Total tersimpan: '+state.xp+' XP</p>'+skillRows+wrongHtml+dokHtml+lisHtml+'<div class="actions"><button class="btn btn-ghost" id="btnTryAgain" type="button">Tryout lagi</button><button class="btn btn-accent" id="btnTryHome" type="button">Kembali ke beranda</button></div></div>';
+  el("btnTryAgain").addEventListener("click",startTryoutMini);
+  el("btnTryHome").addEventListener("click",closeLessonView);
+  window.scrollTo(0,0);
+}
+function renderSprint(){
+  var lead=el("sprintLead");if(!lead)return;
+  var ei=examInfo();
+  if(ei.dExam<0){lead.textContent="Ujian sudah lewat — Mode Sprint tetap bisa dipakai buat menjaga yang sudah nempel.";}
+  else if(ei.dTarget>0){lead.textContent="Fase fondasi — target semua materi selesai 22 November 2026. Tryout Mini boleh dicoba kapan pun buat merasakan rasa ujian; manfaatnya makin terasa setelah materi tuntas.";}
+  else{lead.textContent="Fase SPRINT — masa materi ditargetkan selesai. Fokus sekarang: Tryout Mini berkala + beresin Antrean Perlu Diulang.";}
+  el("sprintInfo").innerHTML=(ei.dExam>=0?("<strong>H-"+ei.dExam+"</strong> ke JLPT N3 (Minggu, 6 Desember 2026) • "):"")+"Tryout Mini: <strong>20 soal • 25 menit</strong> — campuran Bunpō, Kosakata, Listening &amp; Dokkai dari bank soal aplikasi ini. Kunci jawaban, transkrip &amp; terjemahan baru muncul di layar hasil — seperti ujian beneran.";
+  var cats=catUnits();
+  el("sprintSkills").innerHTML=cats.map(function(c){var s=catStat(c);var cls=s.status==="Sudah nempel"?"ok":(s.status==="Perlu diulang"?"warn":"mid");return '<div class="rdy-row"><span class="rdy-name"><span class="jp">'+esc(c.jp)+'</span> '+esc(c.label)+'</span><span class="rdy-badge '+cls+'">'+s.status+'</span><span class="rdy-num">'+s.done+'/'+s.total+' • '+s.pct+'%'+(s.avg!==null?(" • skor "+Math.round(s.avg*100)+"%"):"")+'</span></div>';}).join("");
+  var lt=state.lastTryout,ltx=el("sprintLastTry");
+  if(lt&&ltx){var parts=[];for(var k in lt.perSkill){parts.push(k+" "+lt.perSkill[k].c+"/"+lt.perSkill[k].t);}ltx.innerHTML="Tryout terakhir: <strong>"+lt.correct+"/"+lt.total+" benar ("+Math.round(lt.correct/lt.total*100)+"%)</strong> • "+parts.join(" • ")+"<br>"+new Date(lt.date).toLocaleDateString("id-ID")+" • total sudah "+(state.tryoutCount||0)+"× tryout"+((state.tryoutWrong&&state.tryoutWrong.length)?(" • "+state.tryoutWrong.length+" soal tryout masih perlu diulang (lihat Antrean di Progresku)"):"");}
+  else if(ltx){ltx.textContent="Belum pernah tryout — coba sekali buat tahu rasanya sebelum hari H.";}
+  var b1=el("btnTryoutStart");if(b1&&!b1.__sprintBound){b1.__sprintBound=true;b1.addEventListener("click",startTryoutMini);}
+  var b2=el("btnSprintQueue");if(b2&&!b2.__sprintBound){b2.__sprintBound=true;b2.addEventListener("click",function(){var t=el("progresTitle");if(t)t.scrollIntoView({behavior:"smooth"});});}
+}
 
 document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){openCatView(b.getAttribute("data-go"));});});
 </script>
