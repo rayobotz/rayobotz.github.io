@@ -468,7 +468,7 @@ body{background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linea
     <section aria-labelledby="dataTitle">
       <div class="sources tape tape-matcha">
         <h3 id="dataTitle">Data tersimpan &amp; pengaturan</h3>
-        <p id="saveStatus">Progresmu (XP, level, misi/deck/kuis yang selesai, skor terakhir, kartu di tumpukan ulang, dan rentetan jawaban benar) tersimpan otomatis di penyimpanan lokal browser ini setiap kali ada perubahan. Tidak ada akun, tidak ada server, dan progresmu tidak dikirim ke siapa pun.</p>
+        <p id="saveStatus">Progresmu (XP, level, misi/deck/kuis yang selesai, skor terakhir, kartu di tumpukan ulang, dan rentetan jawaban benar) tersimpan otomatis di penyimpanan lokal browser ini setiap kali ada perubahan. Tidak perlu akun; ringkasan progres ini juga terkirim otomatis ke Ray (pembuat aplikasi ini) supaya dia bisa memantau dan membantumu.</p>
         <ul>
           <li><strong>Tersimpan kalau:</strong> kamu membuka halaman ini lagi di HP yang sama dan browser yang sama.</li>
           <li><strong>Bisa hilang kalau:</strong> ganti HP/browser, hapus data/riwayat browser, atau membuka lewat mode privat/incognito.</li>
@@ -598,7 +598,23 @@ var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
 function todayStr(){var d=new Date();var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
 function yesterdayStr(){var d=new Date();d.setDate(d.getDate()-1);var m=("0"+(d.getMonth()+1)).slice(-2);var day=("0"+d.getDate()).slice(-2);return d.getFullYear()+"-"+m+"-"+day;}
 function markStudyToday(){var today=todayStr();if(studyMeta.lastStudyDate===today)return;if(studyMeta.lastStudyDate===yesterdayStr()){studyMeta.streakDays=(studyMeta.streakDays||0)+1;}else{studyMeta.streakDays=1;}studyMeta.lastStudyDate=today;}
-function saveProgress(){try{studyMeta.savedAt=new Date().toISOString();studyMeta.lastOpenedAt=studyMeta.savedAt;var payload={version:1,state:state,meta:studyMeta};localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));var sh=document.getElementById("saveHint");if(sh){sh.textContent="Tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari"):"")+" • Terakhir disimpan: "+new Date().toLocaleString("id-ID");}var ss=document.getElementById("saveStatus");if(ss&&studyMeta.savedAt){/* keep base text; status shown via saveHint */}}catch(e){/* storage penuh / mode privat — aplikasi tetap jalan tanpa menyimpan */}}
+/* Laporan otomatis ke Ray: ringkasan progres terkirim ke Google Sheet Ray lewat Apps Script (pengganti salin-kirim manual). */
+var N3_TRACK_URL="https://script.google.com/macros/s/AKfycbxeBMuiBz8Mvxny1B5XudqFvD42OH2r4P3sxPyq3AAgfrE4QtzNTuQ3AcO4txqCeCgM/exec";
+var laporTimer=null;
+function jadwalLaporN3(){if(laporTimer)clearTimeout(laporTimer);laporTimer=setTimeout(kirimLaporanN3,6000);}
+function kirimLaporanN3(){
+if(!N3_TRACK_URL)return;
+try{
+var idKey="aplikasi-belajar-n3:deviceid";var did=null;try{did=localStorage.getItem(idKey);}catch(e){}
+if(!did){did="d"+Date.now().toString(36)+Math.floor(Math.random()*99999).toString(36);try{localStorage.setItem(idKey,did);}catch(e){}}
+var det=[];var totDone=0;
+catUnits().forEach(function(c){var s=catStat(c);det.push(c.label+" "+s.done+"/"+s.total);totDone+=s.done;});
+var muatan={id:did,nama:"Dhera",xp:state.xp,unit:totDone,detail:det.join(" \u2022 "),acara:"snapshot",ringkasan:summaryText()};
+fetch(N3_TRACK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(muatan)});
+}catch(e){}
+}
+window.addEventListener("load",function(){setTimeout(kirimLaporanN3,3000);});
+function saveProgress(){try{studyMeta.savedAt=new Date().toISOString();studyMeta.lastOpenedAt=studyMeta.savedAt;var payload={version:1,state:state,meta:studyMeta};localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));jadwalLaporN3();var sh=document.getElementById("saveHint");if(sh){sh.textContent="Tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari"):"")+" • Terakhir disimpan: "+new Date().toLocaleString("id-ID");}var ss=document.getElementById("saveStatus");if(ss&&studyMeta.savedAt){/* keep base text; status shown via saveHint */}}catch(e){/* storage penuh / mode privat — aplikasi tetap jalan tanpa menyimpan */}}
 function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=Array.isArray(data.state.review)?data.state.review:[];state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};state.lastTryout=data.state.lastTryout&&typeof data.state.lastTryout==="object"?data.state.lastTryout:null;state.tryoutWrong=Array.isArray(data.state.tryoutWrong)?data.state.tryoutWrong:[];state.tryoutCount=typeof data.state.tryoutCount==="number"?data.state.tryoutCount:0;}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
 loadProgress();
 (function(){var now=new Date().toISOString();if(!studyMeta.firstOpenedAt)studyMeta.firstOpenedAt=now;studyMeta.lastOpenedAt=now;studyMeta.totalOpens=(studyMeta.totalOpens||0)+1;})();
