@@ -2286,7 +2286,16 @@ var low=KANJI_POOL.filter(function(p){return !used[p.w]&&kjCount(p.w)<2;});kjShu
 for(var i=0;i<low.length&&picked.length<10;i++){picked.push(low[i]);used[low[i].w]=1;}
 if(picked.length<10){var rest=kjShuffle(KANJI_POOL.filter(function(p){return !used[p.w];}));for(var j=0;j<rest.length&&picked.length<10;j++){picked.push(rest[j]);}}
 return kjShuffle(picked);}
-function kjChoicesFor(p){var rs=[p.r];var guard=0;while(rs.length<3&&guard<80){guard++;var c=KANJI_POOL[Math.floor(Math.random()*KANJI_POOL.length)];if(rs.indexOf(c.r)<0)rs.push(c.r);}return kjShuffle(rs.map(function(r){return {r:r,ok:r===p.r};}));}
+function kjChoicesFor(p){var target=p.r;var seen={},cands=[];
+for(var i=0;i<KANJI_POOL.length;i++){var r0=KANJI_POOL[i].r;if(r0!==target&&!seen[r0]){seen[r0]=1;cands.push(r0);}}
+function kjScore(r){var s=0;if(r.slice(-1)===target.slice(-1))s+=4;if(r.length>1&&target.length>1&&r.slice(-2)===target.slice(-2))s+=3;if(r.length===target.length)s+=2;if(r.charAt(0)===target.charAt(0))s+=1;return s;}
+var scored=cands.map(function(r){return {r:r,s:kjScore(r)};});scored.sort(function(a,b){return b.s-a.s;});
+var topBand=scored.length?Math.max(1,scored[0].s-2):0;var top=scored.filter(function(x){return x.s>=topBand;});kjShuffle(top);
+var picks=[target];var sameEnd=scored.filter(function(x){return x.r.slice(-1)===target.slice(-1);});
+if(sameEnd.length){kjShuffle(sameEnd);picks.push(sameEnd[0].r);}
+for(var j=0;j<top.length&&picks.length<3;j++){if(picks.indexOf(top[j].r)<0)picks.push(top[j].r);}
+for(var k=0;k<scored.length&&picks.length<3;k++){if(picks.indexOf(scored[k].r)<0)picks.push(scored[k].r);}
+return kjShuffle(picks.map(function(r){return {r:r,ok:r===target};}));}
 function kanjiStart(){kjEnsure();kjSess={items:kjPick(),idx:0,correct:0,lock:false};kjRenderQ();var t=el("kanjiTitle");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}
 function kjRenderQ(){var box=el("kanjiBox");if(!box||!kjSess)return;var p=kjSess.items[kjSess.idx];kjSess.choices=kjChoicesFor(p);kjSess.cur=p;kjSess.lock=false;
 var h='<p class="hint">Kata '+(kjSess.idx+1)+' dari '+kjSess.items.length+' — bacaannya apa?</p>';
