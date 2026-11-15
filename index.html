@@ -2286,15 +2286,32 @@ var low=KANJI_POOL.filter(function(p){return !used[p.w]&&kjCount(p.w)<2;});kjShu
 for(var i=0;i<low.length&&picked.length<10;i++){picked.push(low[i]);used[low[i].w]=1;}
 if(picked.length<10){var rest=kjShuffle(KANJI_POOL.filter(function(p){return !used[p.w];}));for(var j=0;j<rest.length&&picked.length<10;j++){picked.push(rest[j]);}}
 return kjShuffle(picked);}
-function kjChoicesFor(p){var target=p.r;var seen={},cands=[];
+var KJ_ROWS=["あいうえお","かきくけこ","さしすせそこ","たちつてと","なにぬねの","はひふへほ","まみむめも","やゆよ","らりるれろ","わを"];
+var KJ_DAK={"か":"が","き":"ぎ","く":"ぐ","け":"げ","こ":"ご","さ":"ざ","し":"じ","す":"ず","せ":"ぜ","そ":"ぞ","た":"だ","ち":"ぢ","つ":"づ","て":"で","と":"ど","は":"ば","ひ":"び","ふ":"ぶ","へ":"べ","ほ":"ぼ","が":"か","ぎ":"き","ぐ":"く","げ":"け","ご":"こ","ざ":"さ","じ":"し","ず":"す","ぜ":"せ","ぞ":"そ","だ":"た","ぢ":"ち","づ":"つ","で":"て","ど":"と","ば":"は","び":"ひ","ぶ":"ふ","べ":"へ","ぼ":"ほ"};
+var KJ_SMALL={"や":"ゃ","ゆ":"ゅ","よ":"ょ","つ":"っ","ゃ":"や","ゅ":"ゆ","ょ":"よ","っ":"つ"};
+function kjMutate(r){var chars=r.split("");var ops=[];
+for(var i=0;i<chars.length;i++){var c=chars[i];
+if(KJ_DAK[c])ops.push({t:"rep",i:i,v:KJ_DAK[c]});
+if(KJ_SMALL[c])ops.push({t:"rep",i:i,v:KJ_SMALL[c]});
+for(var q=0;q<KJ_ROWS.length;q++){var row=KJ_ROWS[q];var pos=row.indexOf(c);if(pos>=0){for(var u=0;u<row.length;u++){if(u!==pos)ops.push({t:"rep",i:i,v:row.charAt(u)});}break;}}
+if(i>0&&c!=="っ"&&c!=="ん")ops.push({t:"ins",i:i,v:"っ"});
+}
+if(r.indexOf("ん")>=0&&r.length>2)ops.push({t:"delN"});
+else if(r.length>=2)ops.push({t:"ins",i:r.length-1,v:"ん"});
+if(!ops.length)return null;
+var op=ops[Math.floor(Math.random()*ops.length)];
+if(op.t==="rep")chars[op.i]=op.v;
+else if(op.t==="ins")chars.splice(op.i,0,op.v);
+else if(op.t==="delN"){chars.splice(chars.indexOf("ん"),1);}
+var out=chars.join("");return out!==r?out:null;}
+function kjChoicesFor(p){var target=p.r;var picks=[target];
+if(target.indexOf("/")<0){var guard=0;while(picks.length<3&&guard<60){guard++;var m=kjMutate(target);if(m&&picks.indexOf(m)<0)picks.push(m);}}
+var seen={},cands=[];
 for(var i=0;i<KANJI_POOL.length;i++){var r0=KANJI_POOL[i].r;if(r0!==target&&!seen[r0]){seen[r0]=1;cands.push(r0);}}
 function kjScore(r){var s=0;if(r.slice(-1)===target.slice(-1))s+=4;if(r.length>1&&target.length>1&&r.slice(-2)===target.slice(-2))s+=3;if(r.length===target.length)s+=2;if(r.charAt(0)===target.charAt(0))s+=1;return s;}
-var scored=cands.map(function(r){return {r:r,s:kjScore(r)};});scored.sort(function(a,b){return b.s-a.s;});
-var topBand=scored.length?Math.max(1,scored[0].s-2):0;var top=scored.filter(function(x){return x.s>=topBand;});kjShuffle(top);
-var picks=[target];var sameEnd=scored.filter(function(x){return x.r.slice(-1)===target.slice(-1);});
-if(sameEnd.length){kjShuffle(sameEnd);picks.push(sameEnd[0].r);}
-for(var j=0;j<top.length&&picks.length<3;j++){if(picks.indexOf(top[j].r)<0)picks.push(top[j].r);}
-for(var k=0;k<scored.length&&picks.length<3;k++){if(picks.indexOf(scored[k].r)<0)picks.push(scored[k].r);}
+cands.sort(function(a,b){return kjScore(b)-kjScore(a);});
+for(var k=0;k<cands.length&&picks.length<4;k++){if(picks.indexOf(cands[k])<0)picks.push(cands[k]);}
+if(target.indexOf("/")<0){var g2=0;while(picks.length<4&&g2<60){g2++;var m2=kjMutate(target);if(m2&&picks.indexOf(m2)<0)picks.push(m2);}}
 return kjShuffle(picks.map(function(r){return {r:r,ok:r===target};}));}
 function kanjiStart(){kjEnsure();kjSess={items:kjPick(),idx:0,correct:0,lock:false};kjRenderQ();var t=el("kanjiTitle");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}
 function kjRenderQ(){var box=el("kanjiBox");if(!box||!kjSess)return;var p=kjSess.items[kjSess.idx];kjSess.choices=kjChoicesFor(p);kjSess.cur=p;kjSess.lock=false;
