@@ -385,6 +385,7 @@ body{padding-bottom:74px}
         <div class="stats" aria-label="Statistik progres tersimpan">
           <div class="stat"><b id="statXp">0</b><span>XP tersimpan</span></div>
           <div class="stat"><b id="statLevel">1</b><span>Level</span></div>
+          <div class="stat"><b id="statStreak">0</b><span>Hari beruntun</span></div>
           <div class="stat"><b id="statDone">0/13</b><span>Misi selesai</span></div>
           <div class="stat"><b id="statReview">0</b><span>Kartu perlu diulang</span></div>
         </div>
@@ -439,6 +440,16 @@ body{padding-bottom:74px}
         <div id="step1box"></div>
         <div id="step2box"></div>
         <div class="mission-list" id="missionList"></div>
+        <div id="kanjiMissionBox"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="kanjiTitle">
+      <div class="mission tape tape-kinako">
+        <h3 id="kanjiTitle">🔤 Pemanasan Kanji — Baca Kata Ini</h3>
+        <p>Sepuluh kata berkanji dari materimu sendiri, tampil tanpa furigana. Pilih bacaannya — yang salah masuk antrean ulang; yang sudah 2× benar, furigananya memudar di materi & dokkai.</p>
+        <p class="hint" id="kanjiProgLine"></p>
+        <div id="kanjiBox"><div style="text-align:center"><button type="button" class="btn btn-accent" onclick="kanjiStart()">▶ Mulai — 10 kata · ±3 menit</button></div></div>
       </div>
     </section>
 
@@ -659,7 +670,7 @@ function levelFromXp(xp){var lv=1,i;for(i=0;i<THRESH.length;i++){if(xp>=THRESH[i
    Semua progres disimpan di browser pengguna di perangkat yang sama.
    Tidak dikirim ke server / siapa pun. */
 var STORAGE_KEY="aplikasi-belajar-n3:progress:v1";
-var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{},lastTryout:null,tryoutWrong:[],tryoutCount:0,quizWrong:{},gameBest:{},tadokuRead:{},ctxWrong:{}};
+var DEFAULT_STATE={xp:0,done:{},scores:{},review:[],badges:{},correctStreak:0,attempts:{},lastTryout:null,tryoutWrong:[],tryoutCount:0,quizWrong:{},gameBest:{},tadokuRead:{},ctxWrong:{},kanjiOk:{},kanjiQueue:[],kanjiLastDone:null};
 var DEFAULT_META={streakDays:0,lastStudyDate:null,firstOpenedAt:null,lastOpenedAt:null,totalOpens:0,savedAt:null,furiOn:true,ctxNext:0,guideSeen:false,introSeen:false};
 var state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 var studyMeta=JSON.parse(JSON.stringify(DEFAULT_META));
@@ -683,7 +694,7 @@ fetch(N3_TRACK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/p
 }
 window.addEventListener("load",function(){setTimeout(kirimLaporanN3,3000);});
 function saveProgress(){try{studyMeta.savedAt=new Date().toISOString();studyMeta.lastOpenedAt=studyMeta.savedAt;var payload={version:1,state:state,meta:studyMeta};localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));jadwalLaporN3();var sh=document.getElementById("saveHint");if(sh){sh.textContent="Tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari"):"")+" • Terakhir disimpan: "+new Date().toLocaleString("id-ID");}var ss=document.getElementById("saveStatus");if(ss&&studyMeta.savedAt){/* keep base text; status shown via saveHint */}}catch(e){/* storage penuh / mode privat — aplikasi tetap jalan tanpa menyimpan */}}
-function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=(Array.isArray(data.state.review)?data.state.review:[]).filter(function(c){return !c.front||String(c.front).indexOf("〜")<0;});state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};state.lastTryout=data.state.lastTryout&&typeof data.state.lastTryout==="object"?data.state.lastTryout:null;state.tryoutWrong=Array.isArray(data.state.tryoutWrong)?data.state.tryoutWrong:[];state.tryoutCount=typeof data.state.tryoutCount==="number"?data.state.tryoutCount:0;state.quizWrong=data.state.quizWrong&&typeof data.state.quizWrong==="object"?data.state.quizWrong:{};state.gameBest=data.state.gameBest&&typeof data.state.gameBest==="object"?data.state.gameBest:{};state.tadokuRead=data.state.tadokuRead&&typeof data.state.tadokuRead==="object"?data.state.tadokuRead:{};state.ctxWrong=data.state.ctxWrong&&typeof data.state.ctxWrong==="object"?data.state.ctxWrong:{};}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
+function loadProgress(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;var data=JSON.parse(raw);if(!data||typeof data!=="object")return;if(data.state&&typeof data.state==="object"){state.xp=typeof data.state.xp==="number"?data.state.xp:0;state.done=data.state.done&&typeof data.state.done==="object"?data.state.done:{};state.scores=data.state.scores&&typeof data.state.scores==="object"?data.state.scores:{};state.review=(Array.isArray(data.state.review)?data.state.review:[]).filter(function(c){return !c.front||String(c.front).indexOf("〜")<0;});state.badges=data.state.badges&&typeof data.state.badges==="object"?data.state.badges:{};state.correctStreak=typeof data.state.correctStreak==="number"?data.state.correctStreak:0;state.attempts=data.state.attempts&&typeof data.state.attempts==="object"?data.state.attempts:{};state.lastTryout=data.state.lastTryout&&typeof data.state.lastTryout==="object"?data.state.lastTryout:null;state.tryoutWrong=Array.isArray(data.state.tryoutWrong)?data.state.tryoutWrong:[];state.tryoutCount=typeof data.state.tryoutCount==="number"?data.state.tryoutCount:0;state.quizWrong=data.state.quizWrong&&typeof data.state.quizWrong==="object"?data.state.quizWrong:{};state.gameBest=data.state.gameBest&&typeof data.state.gameBest==="object"?data.state.gameBest:{};state.tadokuRead=data.state.tadokuRead&&typeof data.state.tadokuRead==="object"?data.state.tadokuRead:{};state.ctxWrong=data.state.ctxWrong&&typeof data.state.ctxWrong==="object"?data.state.ctxWrong:{};state.kanjiOk=data.state.kanjiOk&&typeof data.state.kanjiOk==="object"?data.state.kanjiOk:{};state.kanjiQueue=Array.isArray(data.state.kanjiQueue)?data.state.kanjiQueue:[];state.kanjiLastDone=typeof data.state.kanjiLastDone==="string"?data.state.kanjiLastDone:null;}if(data.meta&&typeof data.meta==="object"){for(var k in DEFAULT_META){if(Object.prototype.hasOwnProperty.call(data.meta,k))studyMeta[k]=data.meta[k];}}}catch(e){/* data rusak — mulai dari awal tanpa crash */}}
 loadProgress();
 (function(){var now=new Date().toISOString();if(!studyMeta.firstOpenedAt)studyMeta.firstOpenedAt=now;studyMeta.lastOpenedAt=now;studyMeta.totalOpens=(studyMeta.totalOpens||0)+1;})();
 window.addEventListener("beforeunload",function(){try{saveProgress();}catch(e){}});
@@ -692,7 +703,7 @@ var current=null,step=0,fcIndex=0,fcFlipped=false,qIndex=0,qCorrect=0,qAnswered=
 
 function el(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
-function fjp(s){return esc(s).replace(/([一-龯々〆ヶ]+)《([ぁ-んァ-ヶー・]+)》/g,"<ruby>$1<rt>$2</rt></ruby>");}
+function fjp(s){return esc(s).replace(/([一-龯々〆ヶ]+)《([ぁ-んァ-ヶー・]+)》/g,function(m,k,r){if(typeof state!=="undefined"&&state.kanjiOk&&state.kanjiOk[k]>=2)return k;return "<ruby>"+k+"<rt>"+r+"</rt></ruby>";});}
 function isDokkaiLesson(l){return !!(l&&l.skill==="Dokkai");}
 function isKotobaLesson(l){return !!(l&&(l.skill==="Kosakata"||l.skill==="Kanji"));}
 function lessonAdaKartu(l){return !!(isKotobaLesson(l)&&l.cards&&l.cards.length);}
@@ -1052,7 +1063,7 @@ function renderHome(){
   renderTadokuShelf();
   var fi=el("faktaIsi");if(fi){var nowF=new Date();var awalF=new Date(nowF.getFullYear(),0,0);var poeF=Math.floor((nowF-awalF)/86400000);var idxF=poeF%FAKTA_SERU.length;fi.textContent=FAKTA_SERU[idxF];var fe=el("faktaEmoji");if(fe)fe.textContent=FAKTA_EMOJI[idxF];}
   el("statXp").textContent=state.xp;
-  var lv=levelFromXp(state.xp);el("statLevel").textContent=lv.level;
+  var lv=levelFromXp(state.xp);el("statLevel").textContent=lv.level;var sse=el("statStreak");if(sse)sse.textContent=(studyMeta.streakDays||0);
   el("xpBar").style.width=Math.min(100,Math.round(lv.into/lv.span*100))+"%";
   el("xpHint").textContent=state.xp>=3200?"Level maksimal — mantap! Progresmu tersimpan di browser ini.":"Kumpulkan "+lv.next+" XP buat naik ke Level "+(lv.level+1)+". ("+state.xp+" XP sekarang)";
   var sh0=el("saveHint");if(sh0){sh0.textContent="Progres tersimpan di browser ini"+(studyMeta.streakDays?(" • Rangkaian belajar: "+studyMeta.streakDays+" hari (terakhir: "+(studyMeta.lastStudyDate||"-")+")"):"")+(studyMeta.savedAt?(" • Terakhir disimpan: "+new Date(studyMeta.savedAt).toLocaleString("id-ID")):"");}
@@ -2260,6 +2271,49 @@ function renderSprint(){
 }
 
 document.querySelectorAll(".hb-skill").forEach(function(b){b.addEventListener("click",function(){openCatView(b.getAttribute("data-go"));});});
+
+/* ===== Modul Pemanasan Kanji: Baca Kata Ini (15 Nov 2026) ===== */
+var KANJI_POOL=[{"w": "点検", "r": "てんけん", "m": "pemeriksaan / pengecekan"}, {"w": "返却", "r": "へんきゃく", "m": "pengembalian (buku/barang pinjaman)"}, {"w": "入り口", "r": "いりぐち", "m": "pintu masuk"}, {"w": "借りる", "r": "かりる", "m": "meminjam"}, {"w": "天気予報", "r": "てんきよほう", "m": "ramalan cuaca"}, {"w": "場所", "r": "ばしょ", "m": "tempat"}, {"w": "集まる", "r": "あつまる", "m": "berkumpul"}, {"w": "返事", "r": "へんじ", "m": "balasan / jawaban"}, {"w": "参加費", "r": "さんかひ", "m": "biaya partisipasi"}, {"w": "定員", "r": "ていいん", "m": "kapasitas / jumlah peserta maksimal"}, {"w": "保護者", "r": "ほごしゃ", "m": "orang tua / wali"}, {"w": "申し込み", "r": "もうしこみ", "m": "pendaftaran"}, {"w": "初めて", "r": "はじめて", "m": "pertama kali"}, {"w": "練習", "r": "れんしゅう", "m": "latihan / berlatih"}, {"w": "出来上がる", "r": "できあがる", "m": "selesai dibuat / jadi"}, {"w": "挑戦", "r": "ちょうせん", "m": "mencoba tantangan baru"}, {"w": "途中", "r": "とちゅう", "m": "di tengah perjalanan"}, {"w": "財布", "r": "さいふ", "m": "dompet"}, {"w": "届く", "r": "とどく", "m": "sampai; diserahkan dan diterima"}, {"w": "中身", "r": "なかみ", "m": "isi (bagian dalam)"}, {"w": "習慣", "r": "しゅうかん", "m": "kebiasaan"}, {"w": "続ける", "r": "つづける", "m": "melanjutkan; mempertahankan"}, {"w": "確認", "r": "かくにん", "m": "memastikan; memeriksa kembali"}, {"w": "合う", "r": "あう", "m": "cocok; sesuai"}, {"w": "交流会", "r": "こうりゅうかい", "m": "pertemuan untuk berinteraksi/bertukar"}, {"w": "受付", "r": "うけつけ", "m": "loket pendaftaran; resepsionis"}, {"w": "優先", "r": "ゆうせん", "m": "prioritas; didahulukan"}, {"w": "注文", "r": "ちゅうもん", "m": "pesanan; memesan"}, {"w": "以前", "r": "いぜん", "m": "dahulu; sebelumnya"}, {"w": "余計", "r": "よけい", "m": "berlebih; tidak diperlukan"}, {"w": "見直す", "r": "みなおす", "m": "memeriksa kembali; meninjau ulang"}, {"w": "人気", "r": "にんき", "m": "populer; disukai banyak orang"}, {"w": "謝る", "r": "あやまる", "m": "meminta maaf"}, {"w": "減らす", "r": "へらす", "m": "mengurangi"}, {"w": "疲れる", "r": "つかれる", "m": "lelah; capai"}, {"w": "電気代", "r": "でんきだい", "m": "tagihan listrik"}, {"w": "冷蔵庫", "r": "れいぞうこ", "m": "kulkas; lemari es"}, {"w": "詰める", "r": "つめる", "m": "mengisi penuh; memadatkan"}, {"w": "体調", "r": "たいちょう", "m": "kondisi kesehatan badan"}, {"w": "お疲れさまでした", "r": "おつかれさまでした", "m": "terima kasih atas kerja kerasnya (sapaan pulang kerja)"}, {"w": "助かります", "r": "たすかります", "m": "sangat membantu / tertolong sekali"}, {"w": "無理しないで", "r": "むりしないで", "m": "jangan memaksakan diri"}, {"w": "変更する", "r": "へんこうする", "m": "mengubah (rencana / jadwal / pesanan)"}, {"w": "用事", "r": "ようじ", "m": "ada urusan / keperluan"}, {"w": "延ばす", "r": "のばす", "m": "menunda ke waktu lain"}, {"w": "過ぎ", "r": "すぎ", "m": "lewat (untuk waktu: 九時過ぎ = lewat jam sembilan)"}, {"w": "用事ができる", "r": "ようじができる", "m": "muncul urusan (mendadak berhalangan)"}, {"w": "余る", "r": "あまる", "m": "tersisa; berlebih"}, {"w": "間", "r": "あいだ", "m": "antara / sela waktu"}, {"w": "締め切り", "r": "しめきり", "m": "batas waktu (deadline)"}, {"w": "飽きる", "r": "あきる", "m": "bosan / jenuh"}, {"w": "猿", "r": "さる", "m": "monyet"}, {"w": "音", "r": "おと", "m": "bunyi / suara"}, {"w": "知り合い", "r": "しりあい", "m": "kenalan"}, {"w": "空ける", "r": "あける", "m": "mengosongkan / membuka"}, {"w": "塩", "r": "しお", "m": "garam"}, {"w": "味", "r": "あじ", "m": "rasa"}, {"w": "新入社員", "r": "しんにゅうしゃいん", "m": "karyawan baru"}, {"w": "預ける", "r": "あずける", "m": "menitipkan"}, {"w": "島", "r": "しま", "m": "pulau"}, {"w": "穴", "r": "あな", "m": "lubang"}, {"w": "乗り換え", "r": "のりかえ", "m": "pindah kendaraan / transit"}, {"w": "与える", "r": "あたえる", "m": "memberikan"}, {"w": "城", "r": "しろ", "m": "kastel"}, {"w": "油", "r": "あぶら", "m": "minyak"}, {"w": "電子レンジ", "r": "でんしれんじ", "m": "microwave"}, {"w": "温める", "r": "あたためる", "m": "menghangatkan"}, {"w": "実", "r": "じつ / み", "m": "sebenarnya / buah"}, {"w": "案", "r": "あん", "m": "usulan / rencana"}, {"w": "久しぶり", "r": "ひさしぶり", "m": "lama tidak bertemu"}, {"w": "当たる", "r": "あたる", "m": "kena / tepat / terbukti benar"}, {"w": "酢", "r": "す", "m": "cuka"}, {"w": "胃", "r": "い", "m": "lambung"}, {"w": "引き出し", "r": "ひきだし", "m": "laci"}, {"w": "扱う", "r": "あつかう", "m": "menangani / memperlakukan"}, {"w": "隅", "r": "すみ", "m": "sudut / pojok"}, {"w": "息", "r": "いき", "m": "napas"}, {"w": "悩み", "r": "なやみ", "m": "kekhawatiran / beban pikiran"}, {"w": "集める", "r": "あつめる", "m": "mengumpulkan"}, {"w": "図", "r": "ず", "m": "diagram / bagan"}, {"w": "池", "r": "いけ", "m": "kolam"}, {"w": "匂い", "r": "におい", "m": "bau / aroma"}, {"w": "表す", "r": "あらわす", "m": "menunjukkan / mengekspresikan"}, {"w": "席", "r": "せき", "m": "tempat duduk"}, {"w": "糸", "r": "いと", "m": "benang"}, {"w": "人間関係", "r": "にんげんかんけい", "m": "hubungan antarmanusia"}, {"w": "慌てる", "r": "あわてる", "m": "panik / tergesa-gesa"}, {"w": "咳", "r": "せき", "m": "batuk"}, {"w": "歌", "r": "うた", "m": "lagu"}, {"w": "生年月日", "r": "せいねんがっぴ", "m": "tanggal lahir"}, {"w": "怒る", "r": "おこる", "m": "marah"}, {"w": "線", "r": "せん", "m": "garis"}, {"w": "腕", "r": "うで", "m": "lengan"}, {"w": "専門学校", "r": "せんもんがっこう", "m": "sekolah kejuruan"}, {"w": "急ぐ", "r": "いそぐ", "m": "bergegas / terburu-buru"}, {"w": "底", "r": "そこ", "m": "dasar / bagian bawah"}, {"w": "絵", "r": "え", "m": "gambar / lukisan"}, {"w": "生活習慣", "r": "せいかつしゅうかん", "m": "kebiasaan hidup"}, {"w": "痛む", "r": "いたむ", "m": "terasa sakit / nyeri"}, {"w": "側", "r": "そば", "m": "dekat / samping"}, {"w": "枝", "r": "えだ", "m": "ranting / dahan"}, {"w": "高速道路", "r": "こうそくどうろ", "m": "jalan tol / bebas hambatan"}, {"w": "要る", "r": "いる", "m": "perlu / membutuhkan"}, {"w": "像", "r": "ぞう", "m": "patung"}, {"w": "奥", "r": "おく", "m": "bagian dalam / ujung"}, {"w": "携帯電話", "r": "けいたいでんわ", "m": "telepon genggam (HP)"}, {"w": "植える", "r": "うえる", "m": "menanam"}, {"w": "他", "r": "た / ほか", "m": "yang lain"}, {"w": "親", "r": "おや", "m": "orang tua"}, {"w": "消しゴム", "r": "けしごむ", "m": "penghapus"}, {"w": "受ける", "r": "うける", "m": "menerima / mengikuti (ujian)"}, {"w": "焼き魚", "r": "やきざかな", "m": "ikan panggang"}, {"w": "顔", "r": "かお", "m": "wajah"}, {"w": "決まり", "r": "きまり", "m": "aturan / ketentuan"}, {"w": "疑う", "r": "うたがう", "m": "meragukan / mencurigai"}, {"w": "焼きそば", "r": "やきそば", "m": "mi goreng (yakisoba)"}, {"w": "傘", "r": "かさ", "m": "payung"}, {"w": "代わり", "r": "かわり", "m": "pengganti"}, {"w": "打つ", "r": "うつ", "m": "memukul / mengetik"}, {"w": "山登り", "r": "やまのぼり", "m": "pendakian gunung"}];
+var KANJI_MNEMO={"集まる":"💡 集まる = orang/barangnya berkumpul SENDIRI; pasangannya 集める = KAMU yang mengumpulkan.","集める":"💡 集める = KAMU yang mengumpulkan; pasangannya 集まる = berkumpul sendiri.","席":"💡 席（せき）= kursi untuk duduk; 咳（せき）= batuk. Bunyinya sama — bedakan dari konteks kalimatnya.","咳":"💡 咳（せき）= batuk; 席（せき）= kursi. Bunyinya sama — bedakan dari konteks kalimatnya.","返却":"💡 Sama-sama berawalan 返 (kembalikan): 返却 = kembalikan BARANG pinjaman; 返事 = kembalikan JAWABAN (balasan).","返事":"💡 Sama-sama berawalan 返 (kembalikan): 返事 = kembalikan JAWABAN (balasan); 返却 = kembalikan BARANG pinjaman.","受付":"💡 受付（うけつけ）= tempat menerima tamu (resepsionis); pasangannya 受ける（うける）= menerima / mengikuti ujian.","受ける":"💡 受ける（うける）= menerima / mengikuti ujian; pasangannya 受付（うけつけ）= resepsionis."};
+var kjSess=null;
+function kjEnsure(){if(!state.kanjiOk)state.kanjiOk={};if(!state.kanjiQueue)state.kanjiQueue=[];if(typeof state.kanjiLastDone==="undefined")state.kanjiLastDone=null;}
+function kjCount(w){kjEnsure();return state.kanjiOk[w]||0;}
+function kjMasteredN(){var n=0;for(var i=0;i<KANJI_POOL.length;i++){if(kjCount(KANJI_POOL[i].w)>=2)n++;}return n;}
+function kjShuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function kjPick(){kjEnsure();var byW={};KANJI_POOL.forEach(function(p){byW[p.w]=p;});var picked=[],used={};
+state.kanjiQueue.slice().forEach(function(w){if(byW[w]&&!used[w]&&picked.length<10){picked.push(byW[w]);used[w]=1;}});
+var low=KANJI_POOL.filter(function(p){return !used[p.w]&&kjCount(p.w)<2;});kjShuffle(low);
+for(var i=0;i<low.length&&picked.length<10;i++){picked.push(low[i]);used[low[i].w]=1;}
+if(picked.length<10){var rest=kjShuffle(KANJI_POOL.filter(function(p){return !used[p.w];}));for(var j=0;j<rest.length&&picked.length<10;j++){picked.push(rest[j]);}}
+return kjShuffle(picked);}
+function kjChoicesFor(p){var rs=[p.r];var guard=0;while(rs.length<3&&guard<80){guard++;var c=KANJI_POOL[Math.floor(Math.random()*KANJI_POOL.length)];if(rs.indexOf(c.r)<0)rs.push(c.r);}return kjShuffle(rs.map(function(r){return {r:r,ok:r===p.r};}));}
+function kanjiStart(){kjEnsure();kjSess={items:kjPick(),idx:0,correct:0,lock:false};kjRenderQ();var t=el("kanjiTitle");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}
+function kjRenderQ(){var box=el("kanjiBox");if(!box||!kjSess)return;var p=kjSess.items[kjSess.idx];kjSess.choices=kjChoicesFor(p);kjSess.cur=p;kjSess.lock=false;
+var h='<p class="hint">Kata '+(kjSess.idx+1)+' dari '+kjSess.items.length+' — bacaannya apa?</p>';
+h+='<div style="text-align:center;font-size:2.4rem;font-weight:700;letter-spacing:.05em;margin:10px 0 14px" lang="ja">'+esc(p.w)+'</div>';
+h+='<div class="choices" style="display:grid;gap:8px">';
+kjSess.choices.forEach(function(c,i){h+='<button type="button" class="choice" lang="ja" onclick="kjAnswer('+i+')">'+esc(c.r)+'</button>';});
+h+='</div><div id="kjFeedback" style="min-height:1.6em;margin-top:10px;text-align:center"></div>';
+box.innerHTML=h;}
+function kjAnswer(i){if(!kjSess||kjSess.lock)return;kjSess.lock=true;var p=kjSess.cur;var c=kjSess.choices[i];var fb=el("kjFeedback");var box=el("kanjiBox");var btns=box?box.querySelectorAll(".choice"):[];
+btns.forEach(function(b,j){b.disabled=true;if(kjSess.choices[j].ok)b.style.borderColor="#2e9e5b";});
+if(c.ok){kjSess.correct++;state.kanjiOk[p.w]=kjCount(p.w)+1;var qi=state.kanjiQueue.indexOf(p.w);if(qi>=0)state.kanjiQueue.splice(qi,1);
+if(fb)fb.innerHTML='<strong style="color:#2e9e5b">✅ Benar!</strong> <span lang="ja">'+esc(p.w)+'</span> = '+esc(p.r)+' — '+esc(p.m);
+setTimeout(kjNext,1100);}
+else{if(btns[i])btns[i].style.borderColor="#d64545";if(state.kanjiQueue.indexOf(p.w)<0)state.kanjiQueue.push(p.w);
+var mn=KANJI_MNEMO[p.w]?('<div class="hint" style="margin-top:6px">'+esc(KANJI_MNEMO[p.w])+'</div>'):'';
+if(fb)fb.innerHTML='<strong style="color:#d64545">Kurang tepat.</strong> Bacanya: <ruby lang="ja">'+esc(p.w)+'<rt>'+esc(p.r)+'</rt></ruby> — '+esc(p.m)+mn;
+setTimeout(kjNext,2600);}}
+function kjNext(){if(!kjSess)return;kjSess.idx++;if(kjSess.idx>=kjSess.items.length)kjFinish();else kjRenderQ();}
+function kjFinish(){var gain=kjSess.correct*5;state.xp+=gain;state.kanjiLastDone=todayStr();markStudyToday();saveProgress();
+var box=el("kanjiBox");if(box){box.innerHTML='<div style="text-align:center;padding:8px 0"><p style="font-size:1.6rem">🎉</p><p><strong>Sesi selesai!</strong></p><p>Benar '+kjSess.correct+' dari '+kjSess.items.length+' kata • +'+gain+' XP</p><p class="hint">Kata yang sudah 2× dijawab benar akan tampil tanpa furigana di materi & dokkai — tanda bacaanmu makin nempel.</p><button type="button" class="btn btn-ghost" onclick="kanjiStart()">Main lagi</button></div>';}
+kjSess=null;if(typeof renderHome==="function")renderHome();renderKanjiMission();}
+function renderKanjiMission(){kjEnsure();var mb=el("kanjiMissionBox");
+if(mb){if(state.kanjiLastDone===todayStr()){mb.innerHTML='<div class="step-row"><span class="step-num">✓</span><div class="step-body"><div class="step-title">Misi kecil: Baca 10 kata berkanji</div><div class="step-meta">Sudah selesai hari ini. Mantap!</div></div></div>';}
+else{mb.innerHTML='<div class="step-row"><span class="step-num">+</span><div class="step-body"><div class="step-title">Misi kecil: Baca 10 kata berkanji — ±3 menit</div><div class="step-meta">Pemanasan kanji tanpa furigana, dari kata-kata materimu sendiri.</div><button type="button" class="btn btn-accent" onclick="kanjiStart()">▶ Mulai</button></div></div>';}}
+var pl=el("kanjiProgLine");if(pl)pl.textContent="Dikuasai: "+kjMasteredN()+" dari "+KANJI_POOL.length+" kata • Antrean ulang: "+state.kanjiQueue.length+" kata";}
+renderKanjiMission();
+
 </script>
 
 </body>
