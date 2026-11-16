@@ -2329,15 +2329,16 @@ h+='<div class="choices" style="display:grid;gap:8px">';
 kjSess.choices.forEach(function(c,i){h+='<button type="button" class="choice" lang="ja" onclick="kjAnswer('+i+')">'+esc(c.r)+'</button>';});
 h+='</div><div id="kjFeedback" style="min-height:1.6em;margin-top:10px;text-align:center"></div>';
 box.innerHTML=h;}
+function kjShowNext(){var fb=el("kjFeedback");if(!fb)return;var last=kjSess&&kjSess.idx>=kjSess.items.length-1;fb.innerHTML+='<div style="margin-top:10px"><button type="button" class="btn btn-accent" onclick="kjNext()">'+(last?"Lihat hasil":"Lanjut")+'</button></div>';}
 function kjAnswer(i){if(!kjSess||kjSess.lock)return;kjSess.lock=true;var p=kjSess.cur;var c=kjSess.choices[i];var fb=el("kjFeedback");var box=el("lvBody");var btns=box?box.querySelectorAll(".choice"):[];
 btns.forEach(function(b,j){b.disabled=true;if(kjSess.choices[j].ok)b.style.borderColor="#2e9e5b";});
 if(c.ok){kjSess.correct++;state.kanjiOk[p.w]=kjCount(p.w)+1;var qi=state.kanjiQueue.indexOf(p.w);if(qi>=0)state.kanjiQueue.splice(qi,1);
 if(fb)fb.innerHTML='<strong style="color:#2e9e5b">✅ Benar!</strong> <span lang="ja">'+esc(p.w)+'</span> = '+esc(p.r)+' — '+esc(p.m);
-setTimeout(kjNext,1100);}
+kjShowNext();}
 else{if(btns[i])btns[i].style.borderColor="#d64545";if(state.kanjiQueue.indexOf(p.w)<0)state.kanjiQueue.push(p.w);
 var mn=KANJI_MNEMO[p.w]?('<div class="hint" style="margin-top:6px">'+esc(KANJI_MNEMO[p.w])+'</div>'):'';
 if(fb)fb.innerHTML='<strong style="color:#d64545">Kurang tepat.</strong> Bacanya: <ruby lang="ja">'+esc(p.w)+'<rt>'+esc(p.r)+'</rt></ruby> — '+esc(p.m)+mn;
-setTimeout(kjNext,2600);}}
+kjShowNext();}}
 function kjNext(){if(!kjSess)return;kjSess.idx++;if(kjSess.idx>=kjSess.items.length)kjFinish();else kjRenderQ();}
 function kjFinish(){var gain=kjSess.correct*5;state.xp+=gain;state.kanjiLastDone=todayStr();markStudyToday();saveProgress();
 var box=el("lvBody");if(box){var barF=el("lvBar");if(barF)barF.style.width="100%";box.innerHTML='<div style="text-align:center;padding:8px 0">'+DRM+'<p><strong>Sesi selesai!</strong></p><p>Benar '+kjSess.correct+' dari '+kjSess.items.length+' kata • +'+gain+' XP</p><p class="hint">Kata yang sudah 2× dijawab benar akan tampil tanpa furigana di materi & dokkai — tanda bacaanmu makin nempel.</p><button type="button" class="btn btn-ghost" onclick="kanjiStart()">Main lagi</button> <button type="button" class="btn btn-accent" onclick="closeLessonView()">Kembali</button></div>';}
