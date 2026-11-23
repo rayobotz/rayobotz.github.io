@@ -2393,6 +2393,7 @@ var TR_GUIDE=[
  ["Bagian 3 • 問題4 発話表現","Lihat gambar dan situasinya, pilih ungkapan yang paling tepat diucapkan."],
  ["Bagian 3 • 問題5 即時応答","Dengarkan ucapan pendek, pilih respons yang paling tepat."]
 ];
+var TR_AUDIO_PARTS={1:3,2:3,3:2,4:1,5:2};
 var trRun=null,trTimerInt=null,trLeft=0,trAudioCache={},trAudioPos={};
 (function(){var c={1:0,2:0,3:0};for(var i=0;i<TR_QUESTIONS.length;i++){TR_QUESTIONS[i]._i=c[TR_QUESTIONS[i].s]++;}})();
 function trQs(sec){return TR_QUESTIONS.filter(function(q){return q.s===sec;});}
@@ -2464,7 +2465,9 @@ function trMountAudio(g){
     return;
   }
   slot.innerHTML=label+'<p class="hint">Memuat audio 問題'+g+'…</p>';
-  fetch("tryout-resmi/q"+g+".b64",{cache:"force-cache"}).then(function(r){return r.text();}).then(function(t){
+  var nParts=TR_AUDIO_PARTS[g]||1,reqs=[];
+  for(var k=1;k<=nParts;k++)reqs.push(fetch("tryout-resmi/q"+g+"p"+k+".b64",{cache:"force-cache"}).then(function(r){return r.text();}));
+  Promise.all(reqs).then(function(ts){return ts.join("");}).then(function(t){
     var bin=atob(t.replace(/\s+/g,"")),bytes=new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
     trAudioCache[g]=URL.createObjectURL(new Blob([bytes],{type:"audio/mpeg"}));
